@@ -26,9 +26,6 @@ const PedidosProvider = ({ children }) => {
     obtenerProductos(); // Iniciar la carga de productos al montar el componente
   }, [busqueda]);
 
-
-
-
   const handleSetPedido = (producto) => {
     setPedido((prevPedido) => {
       const productoExistente = prevPedido.find((p) => p.sku === producto.sku);
