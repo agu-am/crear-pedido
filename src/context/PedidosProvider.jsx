@@ -7,10 +7,10 @@ const PedidosProvider = ({ children }) => {
   const [productos, setProductos] = useState([]);
   const [busqueda, setBusqueda] = useState("")
   const [pedido, setPedido] = useState([])
+  const [modalPedido, setModalPedido] = useState(false)
   const productosPorPagina = 100;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-  console.log(url)
   const obtenerProductos = async (pagina) => {
 
     try {
@@ -67,6 +67,8 @@ const PedidosProvider = ({ children }) => {
         handleDecrementPedido,
         setBusqueda,
         busqueda,
+        modalPedido,
+        setModalPedido
       }}
     >
       {children}
