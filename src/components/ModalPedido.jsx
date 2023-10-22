@@ -86,6 +86,7 @@ const Modal = () => {
                             <a
                                 href={`https://wa.me/?phone=543412286236&text=PEDIDO%0A${textoWA}%0AGRACIAS POR SU COMPRA.`}
                                 onClick={() => enviarPedidoWA(pedido)}
+                                target="_blank"
                                 class="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-green-700 border border-transparent lg:hover:bg-green-800 sm:text-2xl">
                                 Realizar pedido
                             </a>
