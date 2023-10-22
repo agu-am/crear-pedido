@@ -8,6 +8,7 @@ const PedidosProvider = ({ children }) => {
   const [busqueda, setBusqueda] = useState("")
   const [pedido, setPedido] = useState([])
   const [modalPedido, setModalPedido] = useState(false)
+  const [textoWA, setTextoWA] = useState("")
   const productosPorPagina = 100;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
@@ -57,6 +58,13 @@ const PedidosProvider = ({ children }) => {
     });
   };
 
+  const enviarPedidoWA = (pedido) => {
+    pedido.map( p => setTextoWA(`
+      PEDIDO%0A
+      *${p.quantitie}x* ${p.name}%0A
+    `))
+  }
+
   return (
     <PedidosContext.Provider
       value={{
@@ -68,7 +76,9 @@ const PedidosProvider = ({ children }) => {
         setBusqueda,
         busqueda,
         modalPedido,
-        setModalPedido
+        setModalPedido,
+        enviarPedidoWA,
+        textoWA
       }}
     >
       {children}
