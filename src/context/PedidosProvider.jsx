@@ -59,10 +59,11 @@ const PedidosProvider = ({ children }) => {
   };
 
   const enviarPedidoWA = (pedido) => {
-    pedido.map( p => setTextoWA(`
-      PEDIDO%0A
+    let textoArray = []
+    pedido.map( p => textoArray.push(`
       *${p.quantitie}x* ${p.name}%0A
     `))
+    setTextoWA(textoArray.toString().replace(/,/g, ""))
   }
 
   return (
