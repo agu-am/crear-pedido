@@ -9,11 +9,16 @@ const PedidosProvider = ({ children }) => {
   const [pedido, setPedido] = useState([])
   const [modalPedido, setModalPedido] = useState(false)
   const [textoWA, setTextoWA] = useState("")
+  const [clientes, setClientes] = useState([])
+  const [clienteActual, setClienteActual] = useState({})
+  const [busquedaCliente, setBusquedaCliente] = useState("")
+  const [observaciones, setObservaciones] = useState("")
   const productosPorPagina = 100;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-  const obtenerProductos = async (pagina) => {
+  const urlClientes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers?_fields=id,username&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
 
+  const obtenerProductos = async (pagina) => {
     try {
       const { data } = await axios(url);
       setProductos(data);
@@ -64,6 +69,17 @@ const PedidosProvider = ({ children }) => {
     setTextoWA(textoArray.toString().replace(/,/g, ""))
   }
 
+  const obtenerClientes = async (url) => {
+    const { data } = await axios(url)
+    let clientes = []
+    data.map(c => clientes.push({id:c.id, name:c.username}))
+    setClientes(clientes)
+  }
+
+  useEffect(() => {
+    obtenerClientes(urlClientes)
+  }, [busquedaCliente])
+
   return (
     <PedidosContext.Provider
       value={{
@@ -77,7 +93,13 @@ const PedidosProvider = ({ children }) => {
         modalPedido,
         setModalPedido,
         enviarPedidoWA,
-        textoWA
+        textoWA,
+        clientes,
+        setBusquedaCliente,
+        clienteActual,
+        setClienteActual,
+        setObservaciones,
+        observaciones
       }}
     >
       {children}

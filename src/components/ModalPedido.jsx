@@ -1,4 +1,5 @@
 import usePedido from "../hooks/usePedido"
+import SearchAutoCompletar from "./SearchAutoCompletar"
 
 const Modal = () => {
 
@@ -9,7 +10,10 @@ const Modal = () => {
         handleDecrementPedido,
         handleSetPedido,
         enviarPedidoWA,
-        textoWA
+        textoWA,
+        clienteActual,
+        setObservaciones,
+        observaciones
     } = usePedido()
 
     return (
@@ -38,8 +42,9 @@ const Modal = () => {
                             <path d="M6 6l12 12"></path>
                         </svg>
                     </button>
-                    <div className="flex flex-col border rounded-md xl:w-4/12">
+                    <div className="flex flex-col xl:w-4/12">
                         <div className="text-center text-3xl uppercase font-bold bg-slate-400">Pedido</div>
+                        <SearchAutoCompletar />
                         <div className="flex-row">
                             {pedido.map(p => (
                                 <div key={p.sku} className="flex flex-col border">
@@ -81,14 +86,22 @@ const Modal = () => {
                         </div>
 
                     </div>
+                    <div className="mt-2">
+                        <h2 className="font-bold uppercase">Observaciones</h2>
+                        <textarea
+                            type="text"
+                            className="w-full border"
+                            onChange={(e) => setObservaciones(e.target.value)}
+                        />
+                    </div>
                     <div class="w-full mx-auto mt-4 overflow-hidden rounded-lg wt-10 sm:flex">
                         <div class="flex justify-center w-full">
                             <a
-                                href={`https://wa.me/?phone=543412286236&text=PEDIDO++++%0A${textoWA}%0AGRACIAS POR SU COMPRA.`}
+                                href={`https://wa.me/?phone=543412286236&text=Pedido de *${clienteActual.name}*%0A%0A${textoWA}%0A${observaciones}`}
                                 onClick={() => enviarPedidoWA(pedido)}
                                 target="_blank"
                                 class="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-green-700 border border-transparent lg:hover:bg-green-800 sm:text-2xl">
-                                Realizar pedido
+                                Enviar pedido
                             </a>
                         </div>
                     </div>
