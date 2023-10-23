@@ -3,7 +3,7 @@ import usePedido from '../hooks/usePedido'
 
 const SearchAutoCompletar = () => {
 
-    const { clientes, setBusquedaCliente, setClienteActual } = usePedido()
+    const { clientes, setBusquedaCliente, setClienteActual, setPedido } = usePedido()
 
     const handleOnSearch = (string, results) => {
         // onSearch will have as the first callback parameter
@@ -18,7 +18,9 @@ const SearchAutoCompletar = () => {
       }
     
       const handleOnSelect = (item) => {
-        setClienteActual(item)
+        setPedido((prevPedido) => ({
+          ...prevPedido, cliente: item
+        }))
       }
     
       const handleOnFocus = () => {
@@ -34,8 +36,8 @@ const SearchAutoCompletar = () => {
       }
 
     return (
-        <div className='w-full py-2 flex flex-col justify-center self-center rounded-md'>
-          <h2 className='font-bold uppercase'>cliente:</h2>
+        <div className='w-full py-2 px-2 flex flex-col justify-center self-center rounded-md'>
+          <h2 className='font-bold uppercase'>Ingresar Cliente:</h2>
             <ReactSearchAutocomplete
                 items={clientes}
                 onSearch={handleOnSearch}

@@ -1,90 +1,98 @@
-import { useState, useEffect, createContext } from "react";
+import React, { useState, useEffect, createContext } from "react";
 import axios from "axios";
 
-const PedidosContext = createContext()
+const PedidosContext = createContext();
 
 const PedidosProvider = ({ children }) => {
   const [productos, setProductos] = useState([]);
-  const [busqueda, setBusqueda] = useState("")
-  const [pedido, setPedido] = useState([])
-  const [modalPedido, setModalPedido] = useState(false)
-  const [textoWA, setTextoWA] = useState("")
-  const [clientes, setClientes] = useState([])
-  const [clienteActual, setClienteActual] = useState({})
-  const [busquedaCliente, setBusquedaCliente] = useState("")
-  const [observaciones, setObservaciones] = useState("")
+  const [busqueda, setBusqueda] = useState("");
+  const [pedido, setPedido] = useState({ id: " ", sku: " ", cliente: " ", productos: [] });
+  const [modalPedido, setModalPedido] = useState(false);
+  const [textoWA, setTextoWA] = useState("");
+  const [clientes, setClientes] = useState([]);
+  const [clienteActual, setClienteActual] = useState({});
+  const [busquedaCliente, setBusquedaCliente] = useState("");
+  const [observaciones, setObservaciones] = useState("");
   const productosPorPagina = 100;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
   const urlClientes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers?_fields=id,username&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
 
-  const obtenerProductos = async (pagina) => {
+  const obtenerProductos = async () => {
     try {
-      const { data } = await axios(url);
-      setProductos(data);
-
+      const { data } = await axios.get(url);
+      const productosFormateados = data.map(p => ({
+        id: p.sku,
+        sku: p.sku,
+        nombre: p.name,
+        cantidad: 0,
+      }));
+      setProductos(productosFormateados);
     } catch (error) {
       console.error("Error al obtener productos:", error);
     }
   };
 
   useEffect(() => {
-    obtenerProductos(); // Iniciar la carga de productos al montar el componente
+    obtenerProductos();
   }, [busqueda]);
 
   const handleSetPedido = (producto) => {
     setPedido((prevPedido) => {
-      const productoExistente = prevPedido.find((p) => p.sku === producto.sku);
-
+      const productoExistente = prevPedido.productos?.find((p) => p.sku === producto.sku);
       if (productoExistente) {
-        // Si el producto ya existe, aumenta la cantidad en 1
-        const actualizarPedido = prevPedido.map((p) =>
-          p.sku === producto.sku ? { ...p, quantitie: p.quantitie + 1 } : p
+        const actualizarPedido = prevPedido.productos.map((p) =>
+          p.sku === producto.sku ? { ...p, cantidad: p.cantidad + 1 } : p
         );
-        return actualizarPedido;
+        return { ...prevPedido, productos: actualizarPedido };
       } else {
-        // Si el producto no existe, agrégalo al carrito con una cantidad inicial de 1
-        return [...prevPedido, { name: producto.name, sku: producto.sku, quantitie: 1 }];
+        const nuevoProducto = { nombre: producto.nombre, sku: producto.sku, cantidad: 1 };
+        return { ...prevPedido, productos: [...prevPedido.productos, nuevoProducto] };
       }
     });
   };
 
   const handleDecrementPedido = (producto) => {
     setPedido((prevPedido) => {
-      const actualizarPedido = prevPedido
+      const actualizarPedido = prevPedido.productos
         .map((p) =>
           p.sku === producto.sku
-            ? { ...p, quantitie: p.quantitie - 1 }
+            ? { ...p, cantidad: p.cantidad - 1 }
             : p
         )
-        .filter((p) => p.quantitie > 0);
+        .filter((p) => p.cantidad > 0);
 
-      return actualizarPedido;
+      return { ...prevPedido, productos: actualizarPedido };
     });
   };
 
   const enviarPedidoWA = (pedido) => {
-    let textoArray = []
-    pedido.map( p => textoArray.push(`*${p.quantitie}x* ${p.name}%0A`))
-    setTextoWA(textoArray.toString().replace(/,/g, ""))
-  }
+    let textoArray = [];
+    pedido.productos.forEach((p) => textoArray.push(`*${p.cantidad}x* ${p.nombre}%0A`));
+    setTextoWA(textoArray.join(""));
+  };
 
-  const obtenerClientes = async (url) => {
-    const { data } = await axios(url)
-    let clientes = []
-    data.map(c => clientes.push({id:c.id, name:c.username}))
-    setClientes(clientes)
-  }
+  const obtenerClientes = async () => {
+    try {
+      const { data } = await axios.get(urlClientes);
+      const clientesFormateados = data.map((c) => ({
+        id: c.id,
+        name: c.username,
+      }));
+      setClientes(clientesFormateados);
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+    }
+  };
 
   useEffect(() => {
-    obtenerClientes(urlClientes)
-  }, [busquedaCliente])
+    obtenerClientes();
+  }, [busquedaCliente]);
 
   return (
     <PedidosContext.Provider
       value={{
         productos,
-        setProductos,
         pedido,
         handleSetPedido,
         handleDecrementPedido,
@@ -99,16 +107,14 @@ const PedidosProvider = ({ children }) => {
         clienteActual,
         setClienteActual,
         setObservaciones,
-        observaciones
+        observaciones,
+        setPedido,
       }}
     >
       {children}
     </PedidosContext.Provider>
-  )
-}
+  );
+};
 
-export {
-  PedidosProvider
-}
-
-export default PedidosContext
+export { PedidosProvider };
+export default PedidosContext;

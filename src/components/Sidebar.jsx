@@ -7,19 +7,18 @@ const Sidebar = () => {
     return (
         <div className="hidden  flex-col border rounded-md m-5 xl:flex w-4/12">
             <div className="text-center text-3xl uppercase font-bold bg-slate-400">Pedido</div>
-            <searchAutoCompletar />
             <div className="flex-row">
-                {pedido.map(p => (
+                {pedido.productos?.map(p => (
                     <div key={p.sku} className="flex flex-col border-b">
                         <p
                             className="text-xl text-center font-medium uppercase xl:truncate"
                         >
-                            {p.name}
+                            {p.nombre}
                         </p>
                         <p
                             className="text-2xl font-bold text-center"
                         >
-                            - x {p.quantitie}
+                            - x {p.cantidad}
                         </p>
                     </div>
                 ))}
