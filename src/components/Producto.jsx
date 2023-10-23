@@ -27,7 +27,7 @@ const Producto = ({ producto }) => {
                 <h3 className="text-sm text-gray-700">{nombre}</h3>
                 <p className="mt-1 text-lg font-medium text-gray-900">SKU: {sku}</p>
             </div>
-            <div className="flex flex-col gap-2 items-end">
+            <div className="flex flex-col gap-2 w-3/12 items-end">
                 <div className=" flex flex-col w-3/12 gap-1 justify-center items-end">
                     <button
                         type="button"
@@ -37,7 +37,7 @@ const Producto = ({ producto }) => {
                         +
                     </button>
                     <input
-                        className="w-10/12 self-center text-center"
+                        className="w-full self-center text-center"
                         type="number"
                         defaultValue={cantidadActual}
                     />
