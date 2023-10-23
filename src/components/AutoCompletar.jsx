@@ -3,13 +3,10 @@ import usePedido from '../hooks/usePedido'
 
 const SearchAutoCompletar = () => {
 
-    const { clientes, setBusquedaCliente, setClienteActual, setPedido } = usePedido()
+    const { clientes, setBusquedaCliente, setPedido } = usePedido()
 
     const handleOnSearch = (string, results) => {
-        // onSearch will have as the first callback parameter
-        // the string searched and for the second the results.
-        console.log(string, results)
-        setBusquedaCliente(string)
+        setBusquedaCliente(string.toUpperCase())
       }
     
       const handleOnHover = (result) => {
