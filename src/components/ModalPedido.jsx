@@ -97,7 +97,7 @@ const Modal = () => {
                     <div class="w-full mx-auto mt-4 overflow-hidden rounded-lg wt-10 sm:flex">
                         <div class="flex justify-center w-full">
                             <a
-                                href={`https://wa.me/?phone=543412286236&text=Pedido de *${clienteActual.name}*%0A%0A${textoWA}%0A${observaciones}`}
+                                href={`https://wa.me/?phone=543412286236&text=Pedido de *${clienteActual.name}*%0A%0A${textoWA}%0A*Observaciones: *%0A${observaciones}`}
                                 onClick={() => enviarPedidoWA(pedido)}
                                 target="_blank"
                                 class="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-green-700 border border-transparent lg:hover:bg-green-800 sm:text-2xl">
