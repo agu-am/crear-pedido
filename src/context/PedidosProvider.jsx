@@ -13,6 +13,9 @@ const PedidosProvider = ({ children }) => {
   const [clienteActual, setClienteActual] = useState({});
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [observaciones, setObservaciones] = useState("");
+  const [cargandoProductos, setCargandoProductos] = useState(true)
+  const [validarCliente, setValidarCliente] = useState(false)
+  const [error, setError] = useState("")
   const productosPorPagina = 100;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
@@ -27,6 +30,7 @@ const PedidosProvider = ({ children }) => {
         nombre: p.name,
         cantidad: 0,
       }));
+      setCargandoProductos(false)
       setProductos(productosFormateados);
     } catch (error) {
       console.error("Error al obtener productos:", error);
@@ -68,9 +72,9 @@ const PedidosProvider = ({ children }) => {
 
   const enviarPedidoWA = (pedido) => {
     let textoArray = [];
-    pedido.productos.forEach((p) => textoArray.push(`*${p.cantidad}x* ${p.nombre}%0A`));
-    setTextoWA(textoArray.join(""));
-  };
+      pedido.productos.forEach((p) => textoArray.push(`*${p.cantidad}x* ${p.nombre}%0A`));
+      setTextoWA(textoArray.join(""));
+    }
 
   const obtenerClientes = async () => {
     try {
@@ -109,6 +113,11 @@ const PedidosProvider = ({ children }) => {
         setObservaciones,
         observaciones,
         setPedido,
+        cargandoProductos,
+        validarCliente,
+        setValidarCliente,
+        error,
+        setError
       }}
     >
       {children}

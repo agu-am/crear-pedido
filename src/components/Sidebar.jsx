@@ -5,7 +5,7 @@ const Sidebar = () => {
     const { pedido } = usePedido()
 
     return (
-        <div className="hidden  flex-col border rounded-md m-5 xl:flex w-4/12">
+        <div className="hidden  flex-col border rounded-md m-5 xl:flex w-full row-start-1 row-end-3">
             <div className="text-center text-3xl uppercase font-bold bg-slate-400">Pedido</div>
             <div className="flex-row">
                 {pedido.productos?.map(p => (

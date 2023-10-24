@@ -1,4 +1,5 @@
 import usePedido from "../hooks/usePedido"
+import Error from "./Error";
 
 const Modal = () => {
 
@@ -10,10 +11,12 @@ const Modal = () => {
         handleSetPedido,
         enviarPedidoWA,
         textoWA,
-        clienteActual,
         setObservaciones,
         observaciones,
-        setPedido
+        setPedido,
+        validarCliente,
+        setError,
+        setValidarCliente
     } = usePedido()
 
     const handleCantidadChange = (sku, newCantidad) => {
@@ -29,6 +32,17 @@ const Modal = () => {
             productos: actualizarPedido,
         }));
     };
+
+    const handleEnviarPedido = (e) => {
+        if (pedido.cliente === " ") {
+            e.preventDefault()
+            setError("Falta colocar cliente")
+            setValidarCliente(true)
+        } else {
+            setValidarCliente(false)
+            enviarPedidoWA(pedido)
+        }
+    }
 
     return (
         // < !---- -
@@ -57,6 +71,7 @@ const Modal = () => {
                         </svg>
                     </button>
                     <div className="flex flex-col xl:w-4/12">
+                        {validarCliente && <Error />}
                         <div className="text-center text-3xl uppercase font-bold bg-slate-400">Pedido</div>
                         <div className="flex-row">
                             {pedido.productos?.map(p => (
@@ -112,7 +127,7 @@ const Modal = () => {
                         <div className="flex justify-center w-full">
                             <a
                                 href={`https://wa.me/?send=543412286236&text=Pedido de *${pedido.cliente.name}*%0A%0A${textoWA}%0A*Observaciones:*%0A${observaciones}&app`}
-                                onClick={() => enviarPedidoWA(pedido)}
+                                onClick={(e) => handleEnviarPedido(e)}
                                 target="_blank"
                                 className="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-green-700 border border-transparent lg:hover:bg-green-800 sm:text-2xl">
                                 Enviar pedido
