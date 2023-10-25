@@ -4,9 +4,11 @@ import ModalPedido from "./components/ModalPedido"
 import { PedidosProvider } from "./context/PedidosProvider"
 import BtnModalPedido from "./components/BtnModalPedido"
 import SearchAutoCompletar from "./components/AutoCompletar"
+import usePedido from "./hooks/usePedido"
 
 function App() {
 
+  // const { pedido } = usePedido()
 
   return (
     <PedidosProvider>

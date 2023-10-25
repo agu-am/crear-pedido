@@ -1,7 +1,6 @@
 import Producto from "./Producto"
 import usePedido from "../hooks/usePedido"
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import CardProductoSkeleton from "./CardProductoSkeleton"
 
 const ListadoProductos = () => {
 
@@ -21,9 +20,8 @@ const ListadoProductos = () => {
                 onChange={e => setBusqueda(e.target.value.toString())}
             />
             <div className="w-full grid gap-2 content-center sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-2">
-
-                {cargandoProductos ? <Skeleton count={20} height={120} width={350} className="mt-2"/> : productos.map(producto => (
-
+                
+                {cargandoProductos ? <CardProductoSkeleton cards={36}/> : productos.map(producto => (
                     <Producto key={producto.sku} producto={producto} />
                 ))}
             </div>

@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react"
 import usePedido from "../hooks/usePedido"
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
-
 
 const Producto = ({ producto }) => {
     const { handleSetPedido, handleDecrementPedido, pedido, cargandoProductos } = usePedido()
@@ -24,7 +21,7 @@ const Producto = ({ producto }) => {
     }, [pedido])
 
 
-    return (
+    return(
             <div className="flex p-3 justify-between items-center aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:h-28">
                 <div>
                     <h3 className="text-sm text-gray-700">{nombre}</h3>

@@ -16,7 +16,8 @@ const Modal = () => {
         setPedido,
         validarCliente,
         setError,
-        setValidarCliente
+        setValidarCliente,
+        setClienteInputSearch
     } = usePedido()
 
     const handleCantidadChange = (sku, newCantidad) => {
@@ -39,8 +40,14 @@ const Modal = () => {
             setError("Falta colocar cliente")
             setValidarCliente(true)
         } else {
-            setValidarCliente(false)
             enviarPedidoWA(pedido)
+            setValidarCliente(false)
+            setPedido((prevPedido) => ({
+                ...prevPedido,
+                productos: []
+            }));
+            setModalPedido(false)
+            setClienteInputSearch(" ")
         }
     }
 

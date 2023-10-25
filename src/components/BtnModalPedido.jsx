@@ -3,11 +3,13 @@ import usePedido from "../hooks/usePedido"
 
 const BtnModalPedido = () => {
 
-    const { modalPedido, setModalPedido } = usePedido()
+    const { modalPedido, setModalPedido, pedido } = usePedido()
 
     return (
         <button 
-        className="fixed z-10 bg-green-700 p-4 rounded-full left-2 bottom-3 xl:hidden"
+        className={pedido.productos.length > 0 
+            ? `fixed z-10 bg-green-700 p-4 rounded-full left-2 bottom-3 xl:hidden` 
+            : `hidden fixed z-10 bg-green-700 p-4 rounded-full left-2 bottom-3 xl:hidden`}
         onClick={() => setModalPedido(!modalPedido)}
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">

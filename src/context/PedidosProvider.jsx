@@ -15,6 +15,7 @@ const PedidosProvider = ({ children }) => {
   const [observaciones, setObservaciones] = useState("");
   const [cargandoProductos, setCargandoProductos] = useState(true)
   const [validarCliente, setValidarCliente] = useState(false)
+  const [clienteInputSearch, setClienteInputSearch] = useState("")
   const [error, setError] = useState("")
   const productosPorPagina = 100;
 
@@ -107,6 +108,7 @@ const PedidosProvider = ({ children }) => {
         enviarPedidoWA,
         textoWA,
         clientes,
+        busquedaCliente,
         setBusquedaCliente,
         clienteActual,
         setClienteActual,
@@ -116,6 +118,8 @@ const PedidosProvider = ({ children }) => {
         cargandoProductos,
         validarCliente,
         setValidarCliente,
+        clienteInputSearch,
+        setClienteInputSearch,
         error,
         setError
       }}

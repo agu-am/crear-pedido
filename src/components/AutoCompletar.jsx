@@ -1,9 +1,11 @@
 import { ReactSearchAutocomplete } from 'react-search-autocomplete'
 import usePedido from '../hooks/usePedido'
+import { useState } from 'react'
 
 const SearchAutoCompletar = () => {
 
-  const { clientes, setBusquedaCliente, setPedido, pedido, setValidarCliente } = usePedido()
+  const { clientes, setBusquedaCliente, setPedido, pedido, setValidarCliente, clienteInputSearch } = usePedido()
+ 
 
   const handleOnSearch = (string, results) => {
     setBusquedaCliente(string.toUpperCase())
@@ -24,6 +26,9 @@ const SearchAutoCompletar = () => {
 const handleOnFocus = () => {
   console.log('Focused')
 }
+const handleLimpiarCliente = () => {
+    pedido.cliente = {}
+}
 
 const formatResult = (item) => {
   return (
@@ -40,9 +45,11 @@ return (
       items={clientes}
       onSearch={handleOnSearch}
       onSelect={handleOnSelect}
-      autoFocus
+      autoFocus={false}
+      inputSearchString={clienteInputSearch}
+      onClear={handleLimpiarCliente}
       formatResult={formatResult}
-      showIcon={false}
+      showIcon={true}
       styling={{
         height: "34px",
         borderRadius: "4px",
