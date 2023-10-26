@@ -12,7 +12,7 @@ function App() {
 
   return (
     <PedidosProvider>
-      <div className="flex flex-col w-full xl:grid grid-cols-[.7fr,.3fr] justify-items-center">
+      <div className="flex flex-col w-full xl:grid grid-cols-[1fr_450px] justify-items-center justify-around">
         <SearchAutoCompletar />
         <ListadoProductos />
         <Sidebar />

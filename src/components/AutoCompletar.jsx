@@ -39,7 +39,7 @@ const formatResult = (item) => {
 }
 
 return (
-  <div className='w-full py-2 px-2 flex flex-col justify-center self-center rounded-md xl:w-3/12 col-start-1 col-end-2 row-start-1 row-end-2'>
+  <div className='w-full py-2 px-2 flex flex-col justify-center self-center rounded-md xl:w-6/12 col-start-1 col-end-2 row-start-1 row-end-2'>
     <h2 className='font-bold uppercase'>Ingresar Cliente:</h2>
     <ReactSearchAutocomplete
       items={clientes}

@@ -16,6 +16,7 @@ const Modal = () => {
         observaciones,
         setPedido,
         validarCliente,
+        handleEnviarPedido,
         setError,
         setValidarCliente,
         setClienteInputSearch
@@ -34,23 +35,6 @@ const Modal = () => {
             productos: actualizarPedido,
         }));
     };
-
-    const handleEnviarPedido = (e) => {
-        if (pedido.cliente === " ") {
-            e.preventDefault()
-            setError("Falta colocar cliente")
-            setValidarCliente(true)
-        } else {
-            enviarPedidoWA(pedido)
-            setValidarCliente(false)
-            setPedido((prevPedido) => ({
-                ...prevPedido,
-                productos: []
-            }));
-            setModalPedido(false)
-            setClienteInputSearch(" ")
-        }
-    }
 
     return (
         // < !---- -
@@ -137,8 +121,9 @@ const Modal = () => {
                                 href={`https://wa.me/543412286236?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoWA}%0A*Observaciones:*%0A${observaciones}&app`}
                                 onClick={(e) => handleEnviarPedido(e)}
                                 target="_blank"
-                                className="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-green-700 border border-transparent lg:hover:bg-green-800 sm:text-2xl">
-                                Enviar pedido <span className="ml-2"><BsWhatsapp size="2rem"/></span>
+                                className="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 sm:text-2xl"
+                            >
+                                Enviar pedido <span className="ml-2"><BsWhatsapp size="2rem" /></span>
                             </a>
                         </div>
                     </div>

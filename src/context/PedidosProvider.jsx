@@ -17,7 +17,7 @@ const PedidosProvider = ({ children }) => {
   const [validarCliente, setValidarCliente] = useState(false)
   const [clienteInputSearch, setClienteInputSearch] = useState("")
   const [error, setError] = useState("")
-  const productosPorPagina = 100;
+  const productosPorPagina = 15;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
   const urlClientes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers?_fields=id,username&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
@@ -89,6 +89,22 @@ const PedidosProvider = ({ children }) => {
       console.error("Error al obtener clientes:", error);
     }
   };
+  const handleEnviarPedido = (e) => {
+    if (pedido.cliente === " ") {
+        e.preventDefault()
+        setError("Falta colocar cliente")
+        setValidarCliente(true)
+    } else {
+        enviarPedidoWA(pedido)
+        setValidarCliente(false)
+        setPedido((prevPedido) => ({
+            ...prevPedido,
+            productos: []
+        }));
+        setModalPedido(false)
+        setClienteInputSearch(" ")
+    }
+}
 
   useEffect(() => {
     obtenerClientes();
@@ -120,6 +136,7 @@ const PedidosProvider = ({ children }) => {
         setValidarCliente,
         clienteInputSearch,
         setClienteInputSearch,
+        handleEnviarPedido,
         error,
         setError
       }}
