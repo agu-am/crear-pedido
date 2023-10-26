@@ -1,5 +1,6 @@
 import usePedido from "../hooks/usePedido"
 import Error from "./Error";
+import { BsWhatsapp } from 'react-icons/bs'
 
 const Modal = () => {
 
@@ -137,7 +138,7 @@ const Modal = () => {
                                 onClick={(e) => handleEnviarPedido(e)}
                                 target="_blank"
                                 className="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-green-700 border border-transparent lg:hover:bg-green-800 sm:text-2xl">
-                                Enviar pedido
+                                Enviar pedido <span className="ml-2"><BsWhatsapp size="2rem"/></span>
                             </a>
                         </div>
                     </div>
