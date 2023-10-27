@@ -3,13 +3,13 @@ import usePedido from "../hooks/usePedido"
 
 const Producto = ({ producto }) => {
     const { handleSetPedido, handleDecrementPedido, pedido, cargandoProductos } = usePedido()
-    const { nombre, sku, cantidad } = producto
+    const { id, name, sku, quantity } = producto
     const [cantidadActual, setCantidadActual] = useState()
 
     const obtenerCantidadActual = () => {
         const productoExistente = pedido.productos.find(p => p.sku === producto.sku);
         if (productoExistente) {
-            setCantidadActual(productoExistente.cantidad);
+            setCantidadActual(productoExistente.quantity);
         } else {
             // Si el producto no existe en el carrito, establece la cantidad actual en 0
             setCantidadActual(0);
@@ -24,7 +24,7 @@ const Producto = ({ producto }) => {
     return(
             <div className="flex p-3 justify-between items-center aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:h-28">
                 <div className="flex flex-col h-full justify-between">
-                    <h3 className="text-sm text-gray-700">{nombre}</h3>
+                    <h3 className="text-sm text-gray-700">{name}</h3>
                     <p className="mt-1 text-lg font-medium text-gray-900">SKU: {sku}</p>
                 </div>
                 <div className="flex flex-col gap-2 w-3/12 items-end">
@@ -32,7 +32,7 @@ const Producto = ({ producto }) => {
                         <button
                             type="button"
                             className="h-8 w-8 justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
-                            onClick={() => handleSetPedido({ nombre, sku, cantidad })}
+                            onClick={() => handleSetPedido({ id, name, sku, quantity })}
                         >
                             +
                         </button>
@@ -44,7 +44,7 @@ const Producto = ({ producto }) => {
                         <button
                             type="button"
                             className="h-8 w-8 justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
-                            onClick={() => handleDecrementPedido({ nombre, sku, cantidad })}
+                            onClick={() => handleDecrementPedido({ id, name, sku, quantity })}
                         >
                             -
                         </button>

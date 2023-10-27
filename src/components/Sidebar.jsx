@@ -6,20 +6,20 @@ const Sidebar = () => {
     const { pedido, textoWA, observaciones, handleEnviarPedido } = usePedido()
 
     return (
-        <div className="flex-col h-screen justify-between border rounded-md p-5 xl:flex w-full row-start-1 row-end-3">
-            <div className="text-center text-3xl uppercase font-bold bg-slate-400">Pedido</div>
+        <div className="hidden flex-col h-screen justify-between border rounded-md p-5 xl:flex w-full row-start-1 row-end-3">
+            <div className="text-center text-3xl uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">Pedido</div>
             <div className="h-full overflow-y-scroll m-2 justify-self-start">
                 {pedido.productos?.map(p => (
                     <div key={p.sku} className="flex flex-col border-b">
                         <p
                             className="text-xl text-center font-medium uppercase xl:truncate"
                         >
-                            {p.nombre}
+                            {p.name}
                         </p>
                         <p
                             className="text-2xl font-bold text-center"
                         >
-                            - x {p.cantidad}
+                            - x {p.quantity}
                         </p>
                     </div>
                 ))}

@@ -1,25 +1,19 @@
-import Sidebar from "./components/Sidebar"
-import ListadoProductos from "./components/ListadoProductos"
-import ModalPedido from "./components/ModalPedido"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { PedidosProvider } from "./context/PedidosProvider"
-import BtnModalPedido from "./components/BtnModalPedido"
-import SearchAutoCompletar from "./components/AutoCompletar"
-import usePedido from "./hooks/usePedido"
+import Home from "./pages/Home"
+import Ordenes from "./pages/Ordenes"
+import NotFound from "./pages/NotFound"
 
 function App() {
-
-  // const { pedido } = usePedido()
-
   return (
     <PedidosProvider>
-      <div className="flex flex-col w-full xl:grid grid-cols-[1fr_450px] justify-items-center justify-around">
-        <SearchAutoCompletar />
-        <ListadoProductos />
-        <Sidebar />
-        <BtnModalPedido />
-        <ModalPedido />
-
-      </div>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />}/>
+          <Route path="/ordenes" element={<Ordenes />}/>
+          <Route path="*" element={<NotFound />}/>
+        </Routes>
+      </Router>
     </PedidosProvider>
   )
 }

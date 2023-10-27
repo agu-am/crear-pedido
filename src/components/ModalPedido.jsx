@@ -64,14 +64,14 @@ const Modal = () => {
                     </button>
                     <div className="flex flex-col xl:w-4/12">
                         {validarCliente && <Error />}
-                        <div className="text-center text-3xl uppercase font-bold bg-slate-400">Pedido</div>
+                        <div className="text-center text-3xl uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">Pedido</div>
                         <div className="flex-row">
                             {pedido.productos?.map(p => (
                                 <div key={p.sku} className="flex flex-col border">
                                     <p
                                         className="text-xl text-center font-medium uppercase xl:truncate"
                                     >
-                                        {p.nombre}
+                                        {p.name}
                                     </p>
                                     <div>
                                         <label htmlFor="Quantity" className="sr-only"> Quantity </label>
@@ -88,7 +88,7 @@ const Modal = () => {
                                             <input
                                                 type="number"
                                                 id="Quantity"
-                                                value={p.cantidad}
+                                                value={p.quantity}
                                                 onChange={(e) => handleCantidadChange(p.sku, e.target.value)}
                                                 className="h-10 w-16 border-transparent text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none"
                                             />
