@@ -1,4 +1,5 @@
 import usePedido from "../hooks/usePedido"
+import { formatearFecha, formatearHora } from "../helpers"
 
 
 const ListadoOrdenes = () => {
@@ -12,7 +13,8 @@ const ListadoOrdenes = () => {
                 >
                     <div className="p-3 text-white font-bold text-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 rounded-t-xl"
                     >
-                        <p>{o.date_created}</p>
+                        <p>FECHA: {formatearFecha(o.date_created)}</p>
+                        <p>HORA: {formatearHora(o.date_created)}</p>
                         <p>{o.billing.state}</p>
                     </div>
                     <ul className="p-3 bg-slate-200 rounded-b-xl">
@@ -26,6 +28,10 @@ const ListadoOrdenes = () => {
                             </li>
                         ))
                         }
+                        <div>
+                            <p className="font-bold uppercase text-center mt-8 underline">Observaciones: </p>
+                            <p className="text-center">{o.customer_note}</p>
+                        </div>
                     </ul>
                 </div>
             ))}
