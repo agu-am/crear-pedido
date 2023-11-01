@@ -18,6 +18,7 @@ const PedidosProvider = ({ children }) => {
   const [clienteInputSearch, setClienteInputSearch] = useState("")
   const [error, setError] = useState("")
   const [ordenes, setOredenes] = useState([])
+  const [toggleMenu, setToggleMenu] = useState(true)
   const productosPorPagina = 15;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
@@ -76,7 +77,7 @@ const PedidosProvider = ({ children }) => {
 
   const enviarPedidoWA = (pedido) => {
     let textoArray = [];
-    pedido.productos.forEach((p) => textoArray.push(`*${p.cantidad}x* ${p.name}%0A`));
+    pedido.productos.forEach((p) => textoArray.push(`*${p.quantity}x* ${p.name}%0A`));
     setTextoWA(textoArray.join(""));
   }
 
@@ -202,6 +203,8 @@ const PedidosProvider = ({ children }) => {
         handleEnviarPedido,
         ordenes,
         crearOrden,
+        toggleMenu,
+        setToggleMenu,
         error,
         setError
       }}
