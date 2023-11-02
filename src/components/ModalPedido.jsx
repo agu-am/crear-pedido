@@ -41,7 +41,7 @@ const Modal = () => {
         //     add this code to this very first div:
         // fixed inset - 0 z - 10
         // -->
-        <div className={modalPedido ? `fixed inset-0 z-10 overflow-y-auto` : `hidden fixed inset-0 z-10 overflow-y-auto`} aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div className={modalPedido ? `fixed inset-0 z-30 overflow-y-auto` : `hidden fixed inset-0 z-10 overflow-y-auto`} aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className="flex items-start justify-center min- px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                 {/* <!--This is the background that overlays when the modal is active. It  has opacity, and that's why the background looks gray.-->
                 <!-----

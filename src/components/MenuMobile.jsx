@@ -9,19 +9,22 @@ const MenuMobile = () => {
             <div className='absolute inset-0 opacity-25 bg-black w-screen h-screen'></div>
             <div className='fixed left-0 top-0 z-30 opacity-100 bg-white rounded-e-xl w-8/12 h-full'>
                 <div className='flex justify-between items-center p-5'>
-                    <img
-                        className='w-2/12'
-                        src="https://pedidosprueba.agustinjs.com/wp-content/uploads/2023/11/logoPedidosPaul.png"
-                        alt="Logo Pedidos Paul"
-                    />
+                    <Link to='/'>
+                        <img
+                            className='w-2/12'
+                            src="https://pedidosprueba.agustinjs.com/wp-content/uploads/2023/11/logoPedidosPaul.png"
+                            alt="Logo Pedidos Paul"
+                        />
+                    </Link>
                     <RxCross2
                         onClick={() => setToggleMenu(false)}
                         size="2rem"
                     />
                 </div>
-                <ul className='px-5'>
-                    <li><Link>Ingresar</Link></li>
-                    <li><Link>Ordenes</Link></li>
+                <ul className='flex flex-col gap-4 text-center px-5 uppercase font-bold'>
+                    <li><Link onClick={() => setToggleMenu(false)} to='/'>Inicio</Link></li>
+                    <li><Link onClick={() => setToggleMenu(false)} to='login'>Ingresar</Link></li>
+                    <li><Link onClick={() => setToggleMenu(false)} to='ordenes'>Ordenes</Link></li>
                     <li><Link>Añadir cliente</Link></li>
                 </ul>
             </div>

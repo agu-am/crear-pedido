@@ -9,7 +9,7 @@ const NavBar = () => {
     setToggleMenu(true)
   }
   return (
-    <div className='sticky top-0 z-20 bg-white px-6 py-2 flex justify-between items-center border-b-2'>
+    <div className='sticky top-0 z-20 bg-white px-4 py-2 flex justify-between items-center border-b-2'>
       {toggleMenu && <MenuMobile />}
       <Link to='/'>
         <img
