@@ -27,7 +27,7 @@ const Login = ({ setToken }) => {
 
     return (
         <div className='h-screen flex flex-col items-center justify-center gap-10'>
-            <h2 className='text-center uppercase font-bold'>Ingresar2</h2>
+            <h2 className='text-center uppercase font-bold'>Ingresar</h2>
             <div className="mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1 xl:w-6/12">
                 <input
                     type="text"
