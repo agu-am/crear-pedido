@@ -5,7 +5,7 @@ import { formatearFecha, formatearHora } from "../helpers"
 const ListadoOrdenes = () => {
     const { ordenes } = usePedido()
     return (
-        <div className="">
+        <div className="grid grid-cols-5">
             {ordenes.map(o => (
                 <div
                     className="flex flex-col m-3"
@@ -15,7 +15,7 @@ const ListadoOrdenes = () => {
                     >
                         <p>FECHA: {formatearFecha(o.date_created)}</p>
                         <p>HORA: {formatearHora(o.date_created)}</p>
-                        <p>{o.billing.state}</p>
+                        <p>{o.billing.first_name}</p>
                     </div>
                     <ul className="p-3 bg-slate-200 rounded-b-xl">
                         {o.line_items.map(i => (
