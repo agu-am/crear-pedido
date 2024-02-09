@@ -26,7 +26,7 @@ const NuevoCliente = () => {
       };
 
       try {
-          const response = await axios.post('http://pedidosprueba.agustinjs.com/wp-json/wp/v2/users', data, config);
+          const response = await axios.post('https://pedidosprueba.agustinjs.com/wp-json/wp/v2/users', data, config);
           console.log('User added successfully', response.data);
       } catch (error) {
           console.error('Error adding user', error);
