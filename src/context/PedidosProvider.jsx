@@ -26,7 +26,6 @@ const PedidosProvider = ({ children }) => {
   const urlOrdenes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/orders?_fields=id,billing,line_items,date_created,customer_note&per_page=50&consumer_key=${import.meta.env.VITE_API_KEY}&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
 
   const obtenerProductos = async () => {
-    console.log(url)
     try {
       const { data } = await axios.get(url);
       const productosFormateados = data.map(p => ({
