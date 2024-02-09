@@ -30,6 +30,7 @@ const NuevoCliente = () => {
           console.log('User added successfully', response.data);
       } catch (error) {
           console.error('Error adding user', error);
+          console.error(error.response.data.message);
       }
   }
 
