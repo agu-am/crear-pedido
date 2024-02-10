@@ -35,9 +35,9 @@ const NuevoCliente = () => {
     }
 
     return (
-        <div className="flex justify-center items-center w-full h-screen">
+        <div className="flex justify-center items-center w-full h-[calc(100vh-64px)]">
             <form
-                className="flex flex-col gap-2 border rounded shadow-sm items-center justify-center xl:w-4/12 h-2/4"
+                className="flex flex-col gap-2 items-center justify-center xl:w-4/12 h-2/4"
                 onSubmit={handleSubmit}
             >
                 <div className="mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1 xl:w-6/12">
@@ -60,7 +60,7 @@ const NuevoCliente = () => {
                     />
                 </div>
                 <button
-                    className='w-6/12 rounded-md font-bold text-white uppercase p-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 xl:w-6/12'
+                    className='w-full rounded-md font-bold text-white uppercase p-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 xl:w-6/12'
                     type="submit"
                 >
                     Agregar Cliente

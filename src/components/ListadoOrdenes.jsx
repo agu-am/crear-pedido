@@ -5,7 +5,7 @@ import { formatearFecha, formatearHora } from "../helpers"
 const ListadoOrdenes = () => {
     const { ordenes } = usePedido()
     return (
-        <div className="grid grid-cols-5">
+        <div className="xl:grid grid-cols-5">
             {ordenes.map(o => (
                 <div
                     className="flex flex-col m-3"

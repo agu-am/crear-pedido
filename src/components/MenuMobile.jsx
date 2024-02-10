@@ -25,7 +25,7 @@ const MenuMobile = () => {
                     <li><Link onClick={() => setToggleMenu(false)} to='/'>Inicio</Link></li>
                     <li><Link onClick={() => setToggleMenu(false)} to='login'>Ingresar</Link></li>
                     <li><Link onClick={() => setToggleMenu(false)} to='ordenes'>Ordenes</Link></li>
-                    <li><Link>Añadir cliente</Link></li>
+                    <li><Link onClick={() => setToggleMenu(false)} to='nuevo-cliente'>Añadir cliente</Link></li>
                 </ul>
             </div>
         </div>
