@@ -7,7 +7,7 @@ const ListadoProductos = () => {
     const { productos, busqueda, setBusqueda, cargandoProductos } = usePedido()
 
     return (
-        <div className=" flex flex-col justify-center xl:w-full row-start-2 p-2">
+        <div className=" flex flex-col xl:w-full row-start-2 p-2">
             <div className="w-10/12 mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1 xl:w-6/12">
                 <input
                     type="text"

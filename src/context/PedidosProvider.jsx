@@ -1,5 +1,7 @@
 import React, { useState, useEffect, createContext } from "react";
 import axios from "axios";
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 const PedidosContext = createContext();
 
@@ -10,7 +12,6 @@ const PedidosProvider = ({ children }) => {
   const [modalPedido, setModalPedido] = useState(false);
   const [textoWA, setTextoWA] = useState("");
   const [clientes, setClientes] = useState([]);
-  const [clienteActual, setClienteActual] = useState({});
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [cargandoProductos, setCargandoProductos] = useState(true)
@@ -107,6 +108,18 @@ const PedidosProvider = ({ children }) => {
       }));
       setModalPedido(false)
       setClienteInputSearch(" ")
+      setObservaciones(" ")
+      toast.success('Pedido realizado!', {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+
     }
   }
 
@@ -189,8 +202,6 @@ const PedidosProvider = ({ children }) => {
         clientes,
         busquedaCliente,
         setBusquedaCliente,
-        clienteActual,
-        setClienteActual,
         setObservaciones,
         observaciones,
         setPedido,

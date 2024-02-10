@@ -6,7 +6,7 @@ import SearchAutoCompletar from "../components/AutoCompletar"
 
 const Home = () => {
     return (
-        <div className="flex flex-col w-full xl:grid grid-cols-[1fr_450px] justify-items-center justify-around">
+        <div className="flex flex-col w-full xl:grid grid-cols-[1fr_450px] grid-rows-[100px_1fr] justify-items-center justify-around">
             <SearchAutoCompletar />
             <ListadoProductos />
             <Sidebar />
