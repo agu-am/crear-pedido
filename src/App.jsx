@@ -13,7 +13,6 @@ function App() {
   return (
     <PedidosProvider>
       <ToastContainer />
-      <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -21,6 +20,7 @@ function App() {
           path="/ordenes"
           element={
             <PrivateRoute>
+              <NavBar />
               <Ordenes />
             </PrivateRoute>
           }
@@ -29,6 +29,7 @@ function App() {
           path="/nuevo-cliente"
           element={
             <PrivateRoute>
+              <NavBar />
               <NuevoCliente />
             </PrivateRoute>
           }
