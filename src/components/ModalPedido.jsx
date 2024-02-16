@@ -1,6 +1,8 @@
 import usePedido from "../hooks/usePedido"
 import Error from "./Error";
 import { BsWhatsapp } from 'react-icons/bs'
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 const Modal = () => {
 
@@ -10,47 +12,45 @@ const Modal = () => {
         pedido,
         handleDecrementPedido,
         handleSetPedido,
-        enviarPedidoWA,
         textoWA,
         setObservaciones,
         observaciones,
         setPedido,
         validarCliente,
-        handleEnviarPedido,
-        setError,
-        setValidarCliente,
-        setClienteInputSearch
+        handleEnviarPedido
     } = usePedido()
 
     const handleCantidadChange = (sku, newCantidad) => {
-        const actualizarPedido = pedido.productos.map((producto) => {
-            if (producto.sku === sku) {
-                return { ...producto, cantidad: Number(newCantidad) };
-            }
-            return producto;
+        setPedido((prevPedido) => {
+            const actualizarPedido = prevPedido.productos.map((producto) => {
+                if (producto.sku === sku) {
+                    return { ...producto, quantity: Number(newCantidad) };
+                }
+                return producto;
+            });
+    
+            return {
+                ...prevPedido,
+                productos: actualizarPedido,
+            };
         });
-
-        setPedido((prevPedido) => ({
-            ...prevPedido,
-            productos: actualizarPedido,
-        }));
+        toast.success('Producto actualizado correctamente!', {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            });
     };
 
     return (
-        // < !---- -
-        //     add this code to this very first div:
-        // fixed inset - 0 z - 10
-        // -->
         <div className={modalPedido ? `fixed inset-0 z-30 overflow-y-auto` : `hidden fixed inset-0 z-10 overflow-y-auto`} aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className="flex items-start justify-center min- px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                {/* <!--This is the background that overlays when the modal is active. It  has opacity, and that's why the background looks gray.-->
-                <!-----
-                add this code to this very first div:
-                fixed inset-0
-  --> */}
                 <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
                 <span className="hidden sm:inline-block sm:align-middle sm:" aria-hidden="true">​</span>
-                {/* <!--Modal panel : This is where you put the pop-up's content, the div on top this coment is the wrapper --> */}
                 <div className="flex flex-col p-5 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-16 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
                     <button
                         className="self-end"
@@ -74,7 +74,7 @@ const Modal = () => {
                                         {p.name}
                                     </p>
                                     <div>
-                                        <label htmlFor="Quantity" className="sr-only"> Quantity </label>
+                                        <label htmlFor="quantity" className="sr-only"> Cantidad </label>
 
                                         <div className="flex justify-center items-center border-gray-200 rounded">
                                             <button
@@ -82,21 +82,20 @@ const Modal = () => {
                                                 className="w-10 h-10 leading-10 text-gray-600 transition hover:opacity-75"
                                                 onClick={() => handleDecrementPedido(p)}
                                             >
-                                                &minus;
+                                                -
                                             </button>
 
                                             <input
                                                 type="number"
-                                                id="Quantity"
+                                                id="quantity"
                                                 value={p.quantity}
                                                 onChange={(e) => handleCantidadChange(p.sku, e.target.value)}
-                                                className="h-10 w-16 border-transparent text-center [-moz-appearance:_textfield] sm:text-sm [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none"
-                                            />
+                                                className="h-10 w-16 border-transparent text-center sm:text-sm"/>
 
                                             <button
                                                 type="button"
                                                 className="w-10 h-10 leading-10 text-gray-600 transition hover:opacity-75"
-                                                onClick={() => handleSetPedido(p)}
+                                                onClick={() => handleSetPedido(p,'Producto actualizado correctamente!')}
                                             >
                                                 +
                                             </button>

@@ -46,7 +46,7 @@ const PedidosProvider = ({ children }) => {
     obtenerProductos();
   }, [busqueda]);
 
-  const handleSetPedido = (producto) => {
+  const handleSetPedido = (producto, mensaje) => {
     setPedido((prevPedido) => {
       const productoExistente = prevPedido.productos?.find((p) => p.sku === producto.sku);
       if (productoExistente) {
@@ -59,6 +59,16 @@ const PedidosProvider = ({ children }) => {
         return { ...prevPedido, productos: [...prevPedido.productos, nuevoProducto] };
       }
     });
+    toast.success(mensaje, {
+      position: "bottom-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      });
   };
 
   const handleDecrementPedido = (producto) => {
