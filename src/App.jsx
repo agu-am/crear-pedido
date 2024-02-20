@@ -7,12 +7,12 @@ import NotFound from "./pages/NotFound";
 import NavBar from "./components/NavBar";
 import NuevoCliente from "./pages/NuevoCliente";
 import Login from "./pages/Login.jsx";
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 function App() {
   return (
     <PedidosProvider>
-      <ToastContainer />
+      <ToastContainer position="top-center" limit={1} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

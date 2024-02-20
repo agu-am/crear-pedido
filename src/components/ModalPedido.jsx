@@ -36,7 +36,7 @@ const Modal = () => {
         });
         toast.success('Producto actualizado correctamente!', {
             position: "bottom-center",
-            autoClose: 5000,
+            autoClose: 500,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
@@ -88,7 +88,8 @@ const Modal = () => {
                                             <input
                                                 type="number"
                                                 id="quantity"
-                                                value={p.quantity}
+                                                value={p.quantity === 0 ? '' : p.quantity}
+                                                // value={p.quantity}
                                                 onChange={(e) => handleCantidadChange(p.sku, e.target.value)}
                                                 className="h-10 w-16 border-transparent text-center sm:text-sm"/>
 
@@ -111,15 +112,16 @@ const Modal = () => {
                         <textarea
                             type="text"
                             className="w-full border"
+                            value={observaciones}
                             onChange={(e) => setObservaciones(e.target.value)}
                         />
                     </div>
                     <div className="w-full mx-auto mt-4 overflow-hidden rounded-lg wt-10 sm:flex">
                         <div className="flex justify-center w-full">
                             <a
-                                href={`https://wa.me/543412286236?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoWA}%0A*Observaciones:*%0A${observaciones}&app`}
+                                // href={`https://wa.me/543412286236?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoWA}%0A*Observaciones:*%0A${observaciones}&app`}
                                 onClick={(e) => handleEnviarPedido(e)}
-                                target="_blank"
+                                // target="_blank"
                                 className="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 sm:text-2xl"
                             >
                                 Enviar pedido <span className="ml-2"><BsWhatsapp size="2rem" /></span>
