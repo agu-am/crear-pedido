@@ -27,7 +27,7 @@ const handleOnFocus = () => {
   console.log('Focused')
 }
 const handleLimpiarCliente = () => {
-    pedido.cliente = {}
+    pedido.cliente = " "
 }
 
 const formatResult = (item) => {

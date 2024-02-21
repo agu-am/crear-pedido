@@ -65,7 +65,7 @@ const Modal = () => {
                     <div className="flex flex-col xl:w-4/12">
                         
                         {validarCliente && <Error mensaje={"FALTA COLOCAR CLIENTE"}/>}
-                        
+
                         <div className="text-center text-3xl uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">Pedido</div>
 
                         {pedido.productos.length === 0 && <Error mensaje={"No hay productos agregados"}/>}
@@ -94,7 +94,6 @@ const Modal = () => {
                                                 type="number"
                                                 id="quantity"
                                                 value={p.quantity === 0 ? '' : p.quantity}
-                                                // value={p.quantity}
                                                 onChange={(e) => handleCantidadChange(p.sku, e.target.value)}
                                                 className="h-10 w-16 border-transparent text-center sm:text-sm"/>
 
