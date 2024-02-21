@@ -12,7 +12,6 @@ const Modal = () => {
         pedido,
         handleDecrementPedido,
         handleSetPedido,
-        textoWA,
         setObservaciones,
         observaciones,
         setPedido,
@@ -35,7 +34,7 @@ const Modal = () => {
             };
         });
         toast.success('Producto actualizado correctamente!', {
-            position: "bottom-center",
+            position: "top-center",
             autoClose: 500,
             hideProgressBar: false,
             closeOnClick: true,
@@ -43,6 +42,7 @@ const Modal = () => {
             draggable: true,
             progress: undefined,
             theme: "colored",
+            toastId: 'actualizar',
             });
     };
 
@@ -51,7 +51,7 @@ const Modal = () => {
             <div className="flex items-start justify-center min- px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                 <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
                 <span className="hidden sm:inline-block sm:align-middle sm:" aria-hidden="true">​</span>
-                <div className="flex flex-col p-5 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-16 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
+                <div className="flex flex-col w-11/12 p-5 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-16 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
                     <button
                         className="self-end"
                         onClick={() => setModalPedido(false)}
@@ -63,8 +63,13 @@ const Modal = () => {
                         </svg>
                     </button>
                     <div className="flex flex-col xl:w-4/12">
-                        {validarCliente && <Error />}
+                        
+                        {validarCliente && <Error mensaje={"FALTA COLOCAR CLIENTE"}/>}
+                        
                         <div className="text-center text-3xl uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">Pedido</div>
+
+                        {pedido.productos.length === 0 && <Error mensaje={"No hay productos agregados"}/>}
+
                         <div className="flex-row">
                             {pedido.productos?.map(p => (
                                 <div key={p.sku} className="flex flex-col border">

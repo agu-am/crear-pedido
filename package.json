@@ -17,7 +17,8 @@
     "react-loading-skeleton": "^3.3.1",
     "react-router-dom": "^6.17.0",
     "react-search-autocomplete": "^8.5.2",
-    "react-toastify": "^10.0.4"
+    "react-toastify": "^10.0.4",
+    "tailwindcss-animated": "^1.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

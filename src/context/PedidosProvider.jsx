@@ -21,7 +21,6 @@ const PedidosProvider = ({ children }) => {
   const [cargandoProductos, setCargandoProductos] = useState(true);
   const [validarCliente, setValidarCliente] = useState(false);
   const [clienteInputSearch, setClienteInputSearch] = useState("");
-  const [error, setError] = useState("");
   const [ordenes, setOredenes] = useState([]);
   const [toggleMenu, setToggleMenu] = useState(false);
   const productosPorPagina = 15;
@@ -118,7 +117,6 @@ const PedidosProvider = ({ children }) => {
   const handleEnviarPedido = (e) => {
     if (pedido.cliente === " ") {
       e.preventDefault();
-      setError("Falta colocar cliente");
       setValidarCliente(true);
     } else {
       let textoArray = [];
@@ -150,6 +148,7 @@ const PedidosProvider = ({ children }) => {
         draggable: true,
         progress: undefined,
         theme: "colored",
+        toastId: customId
       });
     }
   };
@@ -245,8 +244,6 @@ const PedidosProvider = ({ children }) => {
         crearOrden,
         toggleMenu,
         setToggleMenu,
-        error,
-        setError,
       }}
     >
       {children}
