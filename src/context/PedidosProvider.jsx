@@ -27,7 +27,7 @@ const PedidosProvider = ({ children }) => {
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-  const urlClientes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers?_fields=id,username&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY
+  const urlClientes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers?_fields=id,username,billing&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
   const urlOrdenes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/orders?_fields=id,billing,line_items,date_created,customer_note&per_page=50&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
@@ -151,6 +151,7 @@ const PedidosProvider = ({ children }) => {
       const clientesFormateados = data.map((c) => ({
         id: c.id,
         name: c.username,
+        phone: c.billing.phone,
       }));
       setClientes(clientesFormateados);
     } catch (error) {
@@ -169,7 +170,7 @@ const PedidosProvider = ({ children }) => {
       const textoParaWA = textoArray.join("");
       crearOrden();
       window.open(
-        `https://wa.me/543413384599?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoParaWA}%0A*Observaciones:*%0A${observaciones}&app`,
+        `https://wa.me/${pedido.cliente.phone ? pedido.cliente.phone : "543413384599"}?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoParaWA}%0A*Observaciones:*%0A${observaciones}&app`,
         e.target.href,
         "_blank"
       );
