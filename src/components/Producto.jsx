@@ -10,7 +10,7 @@ const Producto = ({ producto }) => {
   const productoExistente = pedido.productos?.find((p) => p.product_id === id);
 
   return (
-    <div className={productoExistente ? "flex p-3 h-24 justify-between items-center w-full overflow-hidden rounded-lg bg-gradient-to-r from-green-400 via-green-500 to-green-600 xl:h-28" : "flex p-3 h-24 justify-between items-center w-full overflow-hidden rounded-lg bg-gray-200 xl:h-28"}>
+    <div className={`flex p-3 h-24 justify-between items-center w-full overflow-hidden rounded-lg  xl:h-28 ${productoExistente ? "bg-gradient-to-r from-green-400 via-green-500 to-green-600" : "bg-gray-200"}`}>
       <div className="flex flex-col h-full justify-between">
         <h3 className="text-sm font-bold text-gray-700">{name}</h3>
         <p className="mt-1 text-lg font-bold text-gray-900">CODIGO: {sku}</p>
