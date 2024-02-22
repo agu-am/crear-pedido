@@ -169,7 +169,7 @@ const PedidosProvider = ({ children }) => {
       const textoParaWA = textoArray.join("");
       crearOrden();
       window.open(
-        `https://wa.me/543412286236?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoParaWA}%0A*Observaciones:*%0A${observaciones}&app`,
+        `https://wa.me/543413384599?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoParaWA}%0A*Observaciones:*%0A${observaciones}&app`,
         e.target.href,
         "_blank"
       );
@@ -177,6 +177,7 @@ const PedidosProvider = ({ children }) => {
       pedido.productos = []
       pedido.cliente = "";
       setModalPedido(false);
+      setBusqueda(" ")
       setClienteInputSearch(" ");
       setObservaciones(" ");
       toast.success("Pedido realizado!", {
