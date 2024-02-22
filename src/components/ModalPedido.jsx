@@ -11,8 +11,8 @@ const Modal = () => {
     modalPedido,
     setModalPedido,
     pedido,
-    handleDecrementPedido,
-    handleSetPedido,
+    handleDisminuirProducto,
+    handleAumentarProducto,
     setObservaciones,
     observaciones,
     setPedido,
@@ -132,7 +132,7 @@ const Modal = () => {
                       <button
                         type="button"
                         className="flex h-8 w-8 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
-                        onClick={() => handleDecrementPedido(p)}
+                        onClick={() => handleDisminuirProducto(p, 'Producto actualizado correctamente!')}
                       >
                         <FaMinus size={".9rem"} />
                       </button>
@@ -151,7 +151,7 @@ const Modal = () => {
                         type="button"
                         className="flex h-8 w-8 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
                         onClick={() =>
-                          handleSetPedido(
+                          handleAumentarProducto(
                             p,
                             "Producto actualizado correctamente!"
                           )

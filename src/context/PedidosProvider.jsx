@@ -52,7 +52,7 @@ const PedidosProvider = ({ children }) => {
     obtenerProductos();
   }, [busqueda]);
 
-  const handleSetPedido = (producto, mensaje) => {
+  const handleAumentarProducto = (producto, mensaje) => {
     setPedido((prevPedido) => {
       const productoExistente = prevPedido.productos?.find(
         (p) => p.sku === producto.sku
@@ -88,7 +88,7 @@ const PedidosProvider = ({ children }) => {
     });
   };
 
-  const handleSetUniquePedido = (producto, mensaje) => {
+  const handleAgregarAlCarrito = (producto, mensaje) => {
     setPedido((prevPedido) => {
       const productoExistente = prevPedido.productos?.find(
         (p) => p.sku === producto.sku
@@ -121,7 +121,7 @@ const PedidosProvider = ({ children }) => {
   };
 
 
-  const handleDecrementPedido = (producto) => {
+  const handleDisminuirProducto = (producto, mensaje) => {
     setPedido((prevPedido) => {
       const actualizarPedido = prevPedido.productos
         .map((p) =>
@@ -130,8 +130,20 @@ const PedidosProvider = ({ children }) => {
         .filter((p) => p.quantity > 0);
 
       return { ...prevPedido, productos: actualizarPedido };
-    });
-  };
+    })
+    toast.success(mensaje, {
+      position: "top-center",
+      limit: 1, 
+      autoClose: 300,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      toastId: 'actualizar'
+    })
+  }
 
   const obtenerClientes = async () => {
     try {
@@ -250,8 +262,8 @@ const PedidosProvider = ({ children }) => {
       value={{
         productos,
         pedido,
-        handleSetPedido,
-        handleDecrementPedido,
+        handleAumentarProducto,
+        handleDisminuirProducto,
         setBusqueda,
         busqueda,
         modalPedido,
@@ -272,7 +284,7 @@ const PedidosProvider = ({ children }) => {
         crearOrden,
         toggleMenu,
         setToggleMenu,
-        handleSetUniquePedido,
+        handleAgregarAlCarrito,
       }}
     >
       {children}

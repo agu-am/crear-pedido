@@ -4,7 +4,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import usePedido from "../hooks/usePedido";
 
 const Producto = ({ producto }) => {
-  const { handleSetUniquePedido, pedido } = usePedido();
+  const { handleAgregarAlCarrito, pedido } = usePedido();
   const { id, name, sku, quantity } = producto;
 
   const productoExistente = pedido.productos?.find((p) => p.product_id === id);
@@ -22,7 +22,7 @@ const Producto = ({ producto }) => {
             disabled={productoExistente}
             className="flex h-8 w-8 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
             onClick={() =>
-              handleSetUniquePedido(
+              handleAgregarAlCarrito(
                 { id, name, sku, quantity },
                 "Producto agregado correctamente!"
               )
