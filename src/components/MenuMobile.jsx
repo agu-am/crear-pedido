@@ -23,7 +23,7 @@ const MenuMobile = () => {
                 </div>
                 <ul className='flex flex-col gap-4 text-center px-5 uppercase font-bold'>
                     <li><Link onClick={() => setToggleMenu(false)} to='/'>Inicio</Link></li>
-                    <li><Link onClick={() => setToggleMenu(false)} to='/login'>Ingresar</Link></li>
+                    {/* <li><Link onClick={() => setToggleMenu(false)} to='/login'>Ingresar</Link></li> */}
                     <li><Link onClick={() => setToggleMenu(false)} to='/ordenes'>Ordenes</Link></li>
                     <li><Link onClick={() => setToggleMenu(false)} to='/nuevo-cliente'>Añadir cliente</Link></li>
                 </ul>

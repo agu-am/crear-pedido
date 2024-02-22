@@ -87,6 +87,39 @@ const PedidosProvider = ({ children }) => {
     });
   };
 
+  const handleSetUniquePedido = (producto, mensaje) => {
+    setPedido((prevPedido) => {
+      const productoExistente = prevPedido.productos?.find(
+        (p) => p.sku === producto.sku
+      );
+      if (!productoExistente) {
+        const nuevoProducto = {
+          product_id: producto.id,
+          name: producto.name,
+          sku: producto.sku,
+          quantity: 1,
+        };
+        return {
+          ...prevPedido,
+          productos: [...prevPedido.productos, nuevoProducto],
+        };
+      }
+      return { ...prevPedido };
+    });
+    toast.success(mensaje, {
+      position: "top-center",
+      limit: 1, 
+      autoClose: 300,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+
+
   const handleDecrementPedido = (producto) => {
     setPedido((prevPedido) => {
       const actualizarPedido = prevPedido.productos
@@ -238,6 +271,7 @@ const PedidosProvider = ({ children }) => {
         crearOrden,
         toggleMenu,
         setToggleMenu,
+        handleSetUniquePedido,
       }}
     >
       {children}
