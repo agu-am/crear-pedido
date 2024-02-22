@@ -55,7 +55,7 @@ return (
         borderRadius: "4px",
         backgroundColor: "white",
         boxShadow: "none",
-        fontSize: "12px",
+        fontSize: "16px",
         placeholderColor: "darkgreen",
         clearIconMargin: "3px 8px 0 0",
         zIndex: 2,

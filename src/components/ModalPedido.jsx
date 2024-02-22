@@ -1,7 +1,8 @@
 import usePedido from "../hooks/usePedido";
 import Error from "./Error";
 import { BsWhatsapp } from "react-icons/bs";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt, FaMinus, FaPlus } from "react-icons/fa";
+import { RiCloseCircleLine } from "react-icons/ri";
 import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
 
@@ -88,24 +89,12 @@ const Modal = () => {
         >
           ​
         </span>
-        <div className="flex flex-col w-11/12 p-5 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-16 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
-          <button className="self-end" onClick={() => setModalPedido(false)}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="icon icon-tabler icon-tabler-x"
-              width="30"
-              height="30"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M18 6l-12 12"></path>
-              <path d="M6 6l12 12"></path>
-            </svg>
+        <div className="flex flex-col w-11/12 p-5 pt-10 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-16 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
+          <button
+            className="absolute right-1 top-1"
+            onClick={() => setModalPedido(false)}
+          >
+            <RiCloseCircleLine size={"2rem"} className="text-red-600" />
           </button>
           <div className="flex flex-col xl:w-4/12">
             {validarCliente && <Error mensaje={"FALTA COLOCAR CLIENTE"} />}
@@ -142,10 +131,10 @@ const Modal = () => {
                     <div className="flex justify-center items-center border-gray-200 rounded">
                       <button
                         type="button"
-                        className="w-10 h-10 leading-10 text-gray-600 transition hover:opacity-75"
+                        className="flex h-8 w-8 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
                         onClick={() => handleDecrementPedido(p)}
                       >
-                        -
+                        <FaMinus size={".9rem"} />
                       </button>
 
                       <input
@@ -160,7 +149,7 @@ const Modal = () => {
 
                       <button
                         type="button"
-                        className="w-10 h-10 leading-10 text-gray-600 transition hover:opacity-75"
+                        className="flex h-8 w-8 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
                         onClick={() =>
                           handleSetPedido(
                             p,
@@ -168,7 +157,7 @@ const Modal = () => {
                           )
                         }
                       >
-                        +
+                        <FaPlus size={".9rem"}/>
                       </button>
                     </div>
                   </div>

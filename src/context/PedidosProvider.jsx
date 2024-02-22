@@ -84,6 +84,7 @@ const PedidosProvider = ({ children }) => {
       draggable: true,
       progress: undefined,
       theme: "colored",
+      toastId:'actualizar',
     });
   };
 
