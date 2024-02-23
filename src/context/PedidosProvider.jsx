@@ -23,7 +23,7 @@ const PedidosProvider = ({ children }) => {
   const [clienteInputSearch, setClienteInputSearch] = useState("");
   const [ordenes, setOredenes] = useState([]);
   const [toggleMenu, setToggleMenu] = useState(false);
-  const productosPorPagina = 15;
+  const productosPorPagina = 25;
 
   const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
@@ -107,6 +107,7 @@ const PedidosProvider = ({ children }) => {
       }
       return { ...prevPedido };
     });
+    setBusqueda(" ");
     toast.success(mensaje, {
       position: "top-center",
       limit: 1, 

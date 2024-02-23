@@ -8,9 +8,9 @@ import { toast } from "react-toastify";
 import AsyncSelect from 'react-select/async'
 const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
 
-    const { clientes, busquedaCliente, setBusquedaCliente } = usePedido();
+    const { clientes, setBusquedaCliente } = usePedido();
 
-    const [clienteId, setClienteId] = useState("");
+    const [idsClientes, setIdsClientes] = useState({});
     const [telefono, setTelefono] = useState("");
 
     const loadOptions = (searchValue, callback) => {
@@ -20,7 +20,6 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
             label: cliente.name,
         })));
     }
-
     const actualizarTelefonoCliente = async (clienteId, telefono) => {
         try {
             const response = await axios.put(`https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers/${clienteId}`, {
@@ -35,7 +34,6 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
 
             if (response.status === 200) {
                 setModalEditarCliente(false)
-                toast.success('Número de teléfono actualizado con éxito');
             } else {
                 console.log('Hubo un problema al actualizar el número de teléfono');
             }
@@ -43,6 +41,16 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
             console.error('Hubo un error al hacer la solicitud:', error);
         }
     }
+
+    const actualizarTelefonos = async (nuevoTelefono) => {
+        const promesas = idsClientes.map(clientes => actualizarTelefonoCliente(clientes.value, nuevoTelefono));
+        try {
+          await Promise.all(promesas);
+          toast.success('Número de teléfono actualizado con éxito');
+        } catch (error) {
+          console.error('Hubo un error al hacer las solicitudes:', error);
+        }
+      };
 
     return (
         <div
@@ -71,12 +79,13 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                         </div>
                         <div className="flex-row w-full">
                             <AsyncSelect
+                                isMulti
                                 options={clientes.map(cliente => ({
                                     value: cliente.id,
                                     label: cliente.name,
                                 }))}
                                 loadOptions={loadOptions}
-                                onChange={(value) => setClienteId(value.value)}
+                                onChange={(value) => setIdsClientes(value)}
                             />
                         </div>
 
@@ -87,7 +96,7 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                         </select>
                         <button
                             className="text-center text-xl p-2 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600"
-                            onClick={() => {actualizarTelefonoCliente(clienteId, telefono)}}
+                            onClick={() => { actualizarTelefonos(telefono) }}
                         >
                             Guardar cambios
                         </button>

@@ -4,7 +4,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import usePedido from "../hooks/usePedido";
 
 const Producto = ({ producto }) => {
-  const { handleAgregarAlCarrito, pedido } = usePedido();
+  const { handleAgregarAlCarrito, pedido, busqueda } = usePedido();
   const { id, name, sku, quantity } = producto;
 
   const productoExistente = pedido.productos?.find((p) => p.product_id === id);

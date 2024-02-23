@@ -11,6 +11,7 @@ const ListadoProductos = () => {
             <div className="w-10/12 mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1 xl:w-6/12">
                 <input
                     type="text"
+                    value={busqueda}
                     placeholder="Buscar producto aquí..."
                     className="flex w-full bg-white text-xl text-black rounded border-white pt-2"
                     onChange={e => setBusqueda(e.target.value.toString())}
