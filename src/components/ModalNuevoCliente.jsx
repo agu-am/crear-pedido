@@ -33,6 +33,7 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
         try {
             const response = await axios.post('https://pedidosprueba.agustinjs.com/wp-json/wp/v2/users', data, config);
             console.log('User added successfully', response.data);
+            setModalNuevoCliente(false);
             toast.success('Cliente agregado exitosamente');
 
         } catch (error) {

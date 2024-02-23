@@ -34,6 +34,7 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
             });
 
             if (response.status === 200) {
+                setModalEditarCliente(false)
                 toast.success('Número de teléfono actualizado con éxito');
             } else {
                 console.log('Hubo un problema al actualizar el número de teléfono');
