@@ -17,11 +17,9 @@ function Login() {
 
     const response = await axios.post('https://pedidosprueba.agustinjs.com/wp-json/jwt-auth/v1/token', data);
 
-    // almacenar el token en el almacenamiento local
     localStorage.setItem('token', response.data.token);
-
-    // redirigir a la página de inicio después de iniciar sesión
-    navigate('/');
+    
+    navigate('/admin');
   };
 
     return (
