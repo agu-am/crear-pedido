@@ -142,9 +142,7 @@ const Sidebar = () => {
       </div>
       <div className="flex items-center justify-center w-full">
         <a
-          href={`https://wa.me/543412286236?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoWA}%0A*Observaciones:*%0A${observaciones}&app`}
           onClick={(e) => handleEnviarPedido(e)}
-          target="_blank"
           className="flex items-center justify-center w-10/12 uppercase text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-bold rounded-lg text-xl px-5 py-2.5 text-center"
         >
           Enviar pedido{" "}
