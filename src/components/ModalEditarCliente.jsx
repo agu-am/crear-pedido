@@ -65,7 +65,7 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                     className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
                     aria-hidden="true"
                 ></div>
-                <div className="flex flex-col w-11/12 p-8 text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-10 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
+                <div className="flex flex-col max-w-xs p-8 text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-10 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
                     <button
                         className="absolute right-1 top-1"
                         onClick={() => setModalEditarCliente(false)}
@@ -77,7 +77,7 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                         <div className="text-center text-3xl p-3 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">
                             Editar Cliente
                         </div>
-                        <div className="flex-row w-full">
+                        <div className="flex-row">
                             <AsyncSelect
                                 isMulti
                                 options={clientes.map(cliente => ({
