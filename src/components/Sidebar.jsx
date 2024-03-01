@@ -104,7 +104,7 @@ const Sidebar = () => {
                     )
                   }
                 >
-                  <FaMinus size={".9rem"} />
+                  <FaMinus size={".6rem"} />
                 </button>
 
                 <input

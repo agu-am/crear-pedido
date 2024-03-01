@@ -7,12 +7,14 @@ const PedidosContext = createContext();
 
 const PedidosProvider = ({ children }) => {
   const [productos, setProductos] = useState([]);
+  const [total, setTotal] = useState();
   const [busqueda, setBusqueda] = useState("");
   const [pedido, setPedido] = useState({
     product_id: " ",
     sku: " ",
     cliente: " ",
     productos: [],
+    total,
   });
   const [modalPedido, setModalPedido] = useState(false);
   const [clientes, setClientes] = useState([]);
@@ -23,9 +25,10 @@ const PedidosProvider = ({ children }) => {
   const [clienteInputSearch, setClienteInputSearch] = useState("");
   const [ordenes, setOredenes] = useState([]);
   const [toggleMenu, setToggleMenu] = useState(false);
+
   const productosPorPagina = 25;
 
-  const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY
+  const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku,price,description&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
   const urlClientes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers?_fields=id,username,billing&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
@@ -40,6 +43,8 @@ const PedidosProvider = ({ children }) => {
         sku: p.sku,
         name: p.name,
         quantity: 0,
+        price: p.price,
+        description: p.description.replace(/<\/?[^>]+(>|$)/g, ""),
       }));
       setCargandoProductos(false);
       setProductos(productosFormateados);
@@ -68,6 +73,8 @@ const PedidosProvider = ({ children }) => {
           name: producto.name,
           sku: producto.sku,
           quantity: 1,
+          price: producto.price,
+          description: producto.description,
         };
         return {
           ...prevPedido,
@@ -77,6 +84,7 @@ const PedidosProvider = ({ children }) => {
     });
     toast.success(mensaje, {
       position: "top-center",
+      limit: 1,
       autoClose: 300,
       hideProgressBar: false,
       closeOnClick: true,
@@ -84,7 +92,7 @@ const PedidosProvider = ({ children }) => {
       draggable: true,
       progress: undefined,
       theme: "colored",
-      toastId:'actualizar',
+      toastId: 'actualizar',
     });
   };
 
@@ -99,6 +107,8 @@ const PedidosProvider = ({ children }) => {
           name: producto.name,
           sku: producto.sku,
           quantity: 1,
+          price: producto.price,
+          description: producto.description,
         };
         return {
           ...prevPedido,
@@ -110,7 +120,7 @@ const PedidosProvider = ({ children }) => {
     setBusqueda(" ");
     toast.success(mensaje, {
       position: "top-center",
-      limit: 1, 
+      limit: 1,
       autoClose: 300,
       hideProgressBar: false,
       closeOnClick: true,
@@ -134,7 +144,7 @@ const PedidosProvider = ({ children }) => {
     })
     toast.success(mensaje, {
       position: "top-center",
-      limit: 1, 
+      limit: 1,
       autoClose: 300,
       hideProgressBar: false,
       closeOnClick: true,
@@ -260,6 +270,15 @@ const PedidosProvider = ({ children }) => {
       });
   };
 
+  const obtenerTotal = () => {
+    const total = pedido.productos.reduce((total, producto) => total + producto.quantity * parseFloat(producto.price), 0);
+    return total.toFixed(2);
+  };
+
+  useEffect(() => {
+    setTotal(obtenerTotal());
+  }, [pedido]);
+
   return (
     <PedidosContext.Provider
       value={{
@@ -288,6 +307,7 @@ const PedidosProvider = ({ children }) => {
         toggleMenu,
         setToggleMenu,
         handleAgregarAlCarrito,
+        total
       }}
     >
       {children}
