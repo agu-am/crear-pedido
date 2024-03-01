@@ -128,47 +128,41 @@ const Modal = () => {
                   <p className="text-sm text-center font-bold uppercase">
                     {p.name}
                   </p>
-                  <div className="flex justify-between">
-                    <div className="flex w-full justify-between items-center border-gray-200 rounded p-2">
-                      <div className="flex">
+                  <div className="flex w-full justify-center border-gray-200 rounded p-2">
+                      <button
+                        type="button"
+                        className="flex h-6 w-6 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
+                        onClick={() =>
+                          handleDisminuirProducto(
+                            p,
+                            "Producto actualizado correctamente!"
+                          )
+                        }
+                      >
+                        <FaMinus size={".6rem"} />
+                      </button>
+                      <input
+                        type="number"
+                        id="quantity"
+                        value={p.quantity === 0 ? "" : p.quantity}
+                        onChange={(e) =>
+                          handleCantidadChange(p.sku, e.target.value)
+                        }
+                        className="h-5 w-8 border-transparent text-center sm:text-sm"
+                      />
 
-                        <button
-                          type="button"
-                          className="flex h-6 w-6 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
-                          onClick={() =>
-                            handleDisminuirProducto(
-                              p,
-                              "Producto actualizado correctamente!"
-                            )
-                          }
-                        >
-                          <FaMinus size={".6rem"} />
-                        </button>
-                        <input
-                          type="number"
-                          id="quantity"
-                          value={p.quantity === 0 ? "" : p.quantity}
-                          onChange={(e) =>
-                            handleCantidadChange(p.sku, e.target.value)
-                          }
-                          className="h-5 w-8 border-transparent text-center sm:text-sm"
-                        />
-
-                        <button
-                          type="button"
-                          className="flex h-6 w-6 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
-                          onClick={() =>
-                            handleAumentarProducto(
-                              p,
-                              "Producto actualizado correctamente!"
-                            )
-                          }
-                        >
-                          <FaPlus size={".9rem"} />
-                        </button>
-                      </div>
-                      <p className="text-sm font-medium text-center text-gray-800"> ${multiplicarPrecioCantidad(p.quantity,p.price)}</p>
-                    </div>
+                      <button
+                        type="button"
+                        className="flex h-6 w-6 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
+                        onClick={() =>
+                          handleAumentarProducto(
+                            p,
+                            "Producto actualizado correctamente!"
+                          )
+                        }
+                      >
+                        <FaPlus size={".9rem"} />
+                      </button>
                   </div>
                 </div>
               ))}
@@ -182,9 +176,6 @@ const Modal = () => {
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
             />
-          </div>
-          <div className="bg-gradient-to-r from-green-400 via-green-500 to-green-600 rounded-lg py-1 w-8/12 self-center">
-            <p className="text-xl font-bold uppercase text-center text-white">Total: ${total}</p>
           </div>
           <div className="w-full mx-auto mt-4 overflow-hidden rounded-lg wt-10 sm:flex">
             <div className="flex justify-center w-full">
