@@ -91,7 +91,11 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
 
                         <label htmlFor="vendedor">Vendedor</label>
                         <select name="" id="vendedor" value={telefono} onChange={(e) => setTelefono(e.target.value)}>
-                            <option value="543412286236">Agustin</option>
+                            <option value="543415617384">Santiago</option>
+                            <option value="543416369777">Luis Ramirez</option>
+                            <option value="543416520721">JUANJO</option>
+                            <option value="543412641951">Javier</option>
+                            <option value="543416525090">Emanuel</option>
                             <option value="543413384599">Paul</option>
                         </select>
                         <button
