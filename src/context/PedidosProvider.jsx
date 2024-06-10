@@ -28,11 +28,11 @@ const PedidosProvider = ({ children }) => {
 
   const productosPorPagina = 25;
 
-  const url = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/products?_fields=id,name,sku,price,description&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY
+  const url = `https://pedidospaul.agudev.com.ar/wp-json/wc/v3/products?_fields=id,name,sku,price,description&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-  const urlClientes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers?_fields=id,username,billing&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY
+  const urlClientes = `https://pedidospaul.agudev.com.ar/wp-json/wc/v3/customers?_fields=id,username,billing&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-  const urlOrdenes = `https://pedidosprueba.agustinjs.com/wp-json/wc/v3/orders?_fields=id,billing,line_items,date_created,customer_note&per_page=50&consumer_key=${import.meta.env.VITE_API_KEY
+  const urlOrdenes = `https://pedidospaul.agudev.com.ar/wp-json/wc/v3/orders?_fields=id,billing,line_items,date_created,customer_note&per_page=50&consumer_key=${import.meta.env.VITE_API_KEY
     }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
 
   const obtenerProductos = async () => {
@@ -225,7 +225,7 @@ const PedidosProvider = ({ children }) => {
 
   const crearOrden = async () => {
     const apiUrl =
-      "https://pedidosprueba.agustinjs.com/wp-json/wc/v3/orders?per_page=50&";
+      "https://pedidospaul.agudev.com.ar/wp-json/wc/v3/orders?per_page=50&";
 
     const orderDatos = {
       payment_method: "bacs", // Método de pago (puede variar)

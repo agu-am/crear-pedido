@@ -45,12 +45,12 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
     const actualizarTelefonos = async (nuevoTelefono) => {
         const promesas = idsClientes.map(clientes => actualizarTelefonoCliente(clientes.value, nuevoTelefono));
         try {
-          await Promise.all(promesas);
-          toast.success('Número de teléfono actualizado con éxito');
+            await Promise.all(promesas);
+            toast.success('Número de teléfono actualizado con éxito');
         } catch (error) {
-          console.error('Hubo un error al hacer las solicitudes:', error);
+            console.error('Hubo un error al hacer las solicitudes:', error);
         }
-      };
+    };
 
     return (
         <div

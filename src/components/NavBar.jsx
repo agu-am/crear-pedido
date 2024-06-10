@@ -14,7 +14,7 @@ const NavBar = () => {
       <Link to='/'>
         <img
           className='w-14'
-          src="https://pedidosprueba.agustinjs.com/wp-content/uploads/2023/11/logoPedidosPaul.png"
+          src="https://pedidospaul.agudev.com.ar/wp-content/uploads/2023/11/logoPedidosPaul.png"
           alt="Logo de Pedidos Paul"
         />
       </Link>
