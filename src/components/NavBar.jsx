@@ -7,6 +7,14 @@ import { clearToken } from '../helpers/api'
 
 const linkBase = 'rounded-full px-4 py-2 text-sm font-semibold transition'
 
+const links = [
+  { to: '/', label: 'Inicio', end: true },
+  { to: '/admin', label: 'Dashboard', end: true },
+  { to: '/productos', label: 'Productos', end: false },
+  { to: '/ordenes', label: 'Órdenes', end: false },
+  { to: '/clientes', label: 'Clientes', end: false },
+]
+
 const NavBar = () => {
   const { toggleMenu, setToggleMenu } = usePedido()
   const navigate = useNavigate()
@@ -34,9 +42,11 @@ const NavBar = () => {
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación">
-          <NavLink to="/productos" className={linkClass}>Productos</NavLink>
-          <NavLink to="/ordenes" className={linkClass}>Órdenes</NavLink>
-          <NavLink to="/clientes" className={linkClass}>Clientes</NavLink>
+          {links.map((l) => (
+            <NavLink key={l.to} to={l.to} end={l.end} className={linkClass}>
+              {l.label}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="flex items-center gap-2">

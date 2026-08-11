@@ -18,6 +18,7 @@ const MenuMobile = () => {
 
     const links = [
         { to: '/', label: 'Inicio', end: true },
+        { to: '/admin', label: 'Dashboard', end: true },
         { to: '/productos', label: 'Productos', end: false },
         { to: '/ordenes', label: 'Órdenes', end: false },
         { to: '/clientes', label: 'Clientes', end: false },
