@@ -50,9 +50,9 @@ const PedidosProvider = ({ children }) => {
           },
         });
         setProductos((prev) =>
-          acumular ? [...prev, ...data] : data
+          acumular ? [...prev, ...data.items] : data.items
         );
-        setHayMasProductos(data.length === productosPorPagina);
+        setHayMasProductos(pagina < data.totalPages);
       } catch (error) {
         setErrorProductos(true);
       } finally {
@@ -86,7 +86,7 @@ const PedidosProvider = ({ children }) => {
       const { data } = await api.get("/clientes", {
         params: { search: busquedaCliente },
       });
-      setClientes(data);
+      setClientes(data.items);
     } catch (error) {
       setErrorClientes(true);
     }

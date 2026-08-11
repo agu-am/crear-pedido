@@ -4,6 +4,7 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import Admin from "./pages/Admin.jsx";
 import Home from "./pages/Home";
 import Ordenes from "./pages/Ordenes";
+import Productos from "./pages/Productos";
 import NotFound from "./pages/NotFound";
 import NavBar from "./components/NavBar";
 import Login from "./pages/Login.jsx";
@@ -28,6 +29,15 @@ function App() {
             <PrivateRoute>
               <NavBar />
               <Admin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/productos"
+          element={
+            <PrivateRoute>
+              <NavBar />
+              <Productos />
             </PrivateRoute>
           }
         />

@@ -1,57 +1,63 @@
-import { useState } from "react";
-import usePedido from "../hooks/usePedido";
+import { useEffect, useState } from "react";
 import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { notificarExito, notificarError } from "../helpers/toast";
-import AsyncSelect from "react-select/async";
 import { vendedores } from "../helpers/vendedores";
 
-const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
-    const { clientes, setBusquedaCliente } = usePedido();
+const ModalEditarCliente = ({ cliente, setCliente, onGuardado }) => {
+    const [form, setForm] = useState({ first_name: "", last_name: "", email: "", telefono: "" });
+    const [cargando, setCargando] = useState(false);
 
-    const [idsClientes, setIdsClientes] = useState({});
-    const [telefono, setTelefono] = useState("");
+    useEffect(() => {
+        if (cliente) {
+            setForm({
+                first_name: cliente.first_name || "",
+                last_name: cliente.last_name || "",
+                email: cliente.email || "",
+                telefono: cliente.phone || "",
+            });
+        }
+    }, [cliente]);
 
-    const loadOptions = (searchValue, callback) => {
-        setBusquedaCliente(searchValue);
-        callback(clientes.map(cliente => ({
-            value: cliente.id,
-            label: cliente.name,
-        })));
-    };
+    if (!cliente) return null;
 
-    const actualizarTelefonoCliente = async (clienteId, telefono) => {
-        await api.put(`/clientes/${clienteId}/telefono`, { telefono });
-    };
+    const abierto = Boolean(cliente)
 
-    const actualizarTelefonos = async (nuevoTelefono) => {
-        const promesas = idsClientes.map(cliente =>
-            actualizarTelefonoCliente(cliente.value, nuevoTelefono)
-        );
+    const set = (clave) => (e) => setForm((prev) => ({ ...prev, [clave]: e.target.value }))
+
+    const handleGuardar = async () => {
+        setCargando(true);
         try {
-            await Promise.all(promesas);
-            setModalEditarCliente(false);
-            notificarExito('Número de teléfono actualizado con éxito');
+            await api.put(`/clientes/${cliente.id}`, form);
+            setCliente(null);
+            notificarExito("Cliente actualizado con éxito");
+            onGuardado?.();
         } catch (error) {
-            notificarError('Hubo un error al hacer las solicitudes');
+            notificarError(error?.response?.data?.message || "Hubo un error al actualizar el cliente");
+        } finally {
+            setCargando(false);
         }
     };
 
+    const inputCls =
+        "w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+    const labelCls = "mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+
     return (
         <div
-            className={modalEditarCliente ? "fixed inset-0 z-40 flex items-center justify-center p-4" : "hidden"}
+            className={abierto ? "fixed inset-0 z-40 flex items-center justify-center p-4" : "hidden"}
             role="dialog"
             aria-modal="true"
         >
             <div
                 className="absolute inset-0 bg-ink/50"
-                onClick={() => setModalEditarCliente(false)}
+                onClick={() => setCliente(null)}
             ></div>
             <div className="relative w-full max-w-md rounded-3xl bg-canvas p-6 shadow-sheet">
                 <div className="mb-5 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-ink">Editar cliente</h2>
                     <button
-                        onClick={() => setModalEditarCliente(false)}
+                        onClick={() => setCliente(null)}
                         className="text-mute transition hover:text-ink"
                         aria-label="Cerrar"
                     >
@@ -61,35 +67,24 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
 
                 <div className="flex flex-col gap-4">
                     <div>
-                        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute">
-                            Clientes
-                        </label>
-                        <AsyncSelect
-                            isMulti
-                            options={clientes.map(cliente => ({
-                                value: cliente.id,
-                                label: cliente.name,
-                            }))}
-                            loadOptions={loadOptions}
-                            onChange={(value) => setIdsClientes(value)}
-                            classNamePrefix="select"
-                        />
+                        <label htmlFor="c-nombre" className={labelCls}>Nombre</label>
+                        <input id="c-nombre" type="text" value={form.first_name} onChange={set("first_name")} className={inputCls} />
                     </div>
 
                     <div>
-                        <label
-                            htmlFor="vendedor"
-                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
-                        >
-                            Vendedor
-                        </label>
-                        <select
-                            id="vendedor"
-                            value={telefono}
-                            onChange={(e) => setTelefono(e.target.value)}
-                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
-                        >
-                            <option value="">Seleccionar...</option>
+                        <label htmlFor="c-apellido" className={labelCls}>Apellido</label>
+                        <input id="c-apellido" type="text" value={form.last_name} onChange={set("last_name")} className={inputCls} />
+                    </div>
+
+                    <div>
+                        <label htmlFor="c-email" className={labelCls}>Email</label>
+                        <input id="c-email" type="email" value={form.email} onChange={set("email")} className={inputCls} />
+                    </div>
+
+                    <div>
+                        <label htmlFor="c-vendedor" className={labelCls}>Vendedor</label>
+                        <select id="c-vendedor" value={form.telefono} onChange={set("telefono")} className={inputCls}>
+                            <option value="">Sin vendedor</option>
                             {vendedores.map((v) => (
                                 <option key={v.value} value={v.value}>{v.label}</option>
                             ))}
@@ -97,10 +92,11 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                     </div>
 
                     <button
-                        onClick={() => { actualizarTelefonos(telefono) }}
-                        className="w-full rounded-3xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]"
+                        onClick={handleGuardar}
+                        disabled={cargando}
+                        className="w-full rounded-3xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99] disabled:opacity-60"
                     >
-                        Guardar cambios
+                        {cargando ? "Guardando..." : "Guardar cambios"}
                     </button>
                 </div>
             </div>

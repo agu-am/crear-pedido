@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { wcFetch, validarCredenciales } from "./lib/wc.js";
+import { wcFetch, wcFetchPaginado, validarCredenciales } from "./lib/wc.js";
 import { emitirToken, authRequerido } from "./lib/auth.js";
 
 const app = express();
@@ -44,15 +44,67 @@ const formatearProducto = (p) => ({
   sku: p.sku,
   name: p.name,
   price: p.price,
+  regular_price: p.regular_price,
+  sale_price: p.sale_price,
+  stock_quantity: p.stock_quantity,
+  stock_status: p.stock_status,
+  status: p.status,
+  type: p.type,
   description: (p.description || "").replace(/<\/?[^>]+(>|$)/g, ""),
 });
 
 const formatearCliente = (c) => ({
   id: c.id,
   name: c.billing?.first_name || c.username || c.name || "",
+  username: c.username,
+  first_name: c.billing?.first_name || "",
+  last_name: c.billing?.last_name || "",
   email: c.email || "",
   phone: c.billing?.phone || "",
 });
+
+function armarProducto(input, esNuevo) {
+  if (!input || !input.name || !String(input.name).trim()) {
+    return { error: "El nombre es obligatorio" };
+  }
+  const payload = {};
+  if (esNuevo) payload.type = "simple";
+  payload.name = String(input.name).trim();
+  if (input.sku) payload.sku = String(input.sku).trim();
+  if (input.description) payload.description = String(input.description);
+  if (input.status) payload.status = input.status;
+
+  const precio =
+    input.regular_price !== undefined && input.regular_price !== ""
+      ? Number(input.regular_price)
+      : null;
+  if (precio !== null) {
+    if (Number.isNaN(precio) || precio < 0) return { error: "Precio inválido" };
+    payload.regular_price = String(precio);
+  }
+  const oferta =
+    input.sale_price !== undefined && input.sale_price !== ""
+      ? Number(input.sale_price)
+      : null;
+  if (oferta !== null) {
+    if (Number.isNaN(oferta) || oferta < 0)
+      return { error: "Precio de oferta inválido" };
+    payload.sale_price = String(oferta);
+  }
+  const stock =
+    input.stock_quantity !== undefined && input.stock_quantity !== ""
+      ? Number(input.stock_quantity)
+      : null;
+  if (stock !== null) {
+    if (Number.isNaN(stock) || stock < 0) return { error: "Stock inválido" };
+    payload.manage_stock = true;
+    payload.stock_quantity = stock;
+    payload.stock_status = stock > 0 ? "instock" : "outofstock";
+  } else if (input.stock_status) {
+    payload.stock_status = input.stock_status;
+  }
+  return { payload };
+}
 
 // Healthcheck (útil para PM2 en Hostinger)
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
@@ -97,15 +149,16 @@ app.get("/api/productos", async (req, res, next) => {
     const cacheado = leerCache(key);
     if (cacheado) return res.json(cacheado);
 
-    const data = await wcFetch("products", {
+    const resultado = await wcFetchPaginado("products", {
       query: {
-        _fields: "id,name,sku,price,description",
+        _fields:
+          "id,name,sku,regular_price,sale_price,price,stock_quantity,stock_status,status,type,description",
         search,
         per_page: perPage,
         page,
       },
     });
-    const resultado = data.map(formatearProducto);
+    resultado.items = resultado.items.map(formatearProducto);
     cachear(key, resultado);
     res.json(resultado);
   } catch (err) {
@@ -116,15 +169,22 @@ app.get("/api/productos", async (req, res, next) => {
 // ---- Clientes (público, solo lectura: id, nombre, email, teléfono) ----
 app.get("/api/clientes", async (req, res, next) => {
   try {
+    const page = Number(req.query.page || 1);
+    const perPage = Number(req.query.per_page || 25);
     const search = (req.query.search || "").trim();
-    const key = `clientes:${search}`;
+    const key = `clientes:${search}:${page}:${perPage}`;
     const cacheado = leerCache(key);
     if (cacheado) return res.json(cacheado);
 
-    const data = await wcFetch("customers", {
-      query: { _fields: "id,username,email,billing", search, per_page: 25 },
+    const resultado = await wcFetchPaginado("customers", {
+      query: {
+        _fields: "id,username,email,billing",
+        search,
+        per_page: perPage,
+        page,
+      },
     });
-    const resultado = data.map(formatearCliente);
+    resultado.items = resultado.items.map(formatearCliente);
     cachear(key, resultado);
     res.json(resultado);
   } catch (err) {
@@ -176,15 +236,17 @@ app.post("/api/ordenes", authRequerido, async (req, res, next) => {
 // ---- Clientes (escritura, protegido) ----
 app.post("/api/clientes", authRequerido, async (req, res, next) => {
   try {
-    const { username, email } = req.body || {};
+    const { username, email, first_name } = req.body || {};
     if (!username || !email) {
       return res.status(400).json({ message: "Faltan username o email" });
     }
+    const billing = { email };
+    if (first_name) billing.first_name = String(first_name);
     const data = await wcFetch("customers", {
       method: "POST",
-      body: { username, email, billing: { email } },
+      body: { username, email, billing },
     });
-    res.status(201).json({ id: data.id, username: data.username, email: data.email });
+    res.status(201).json(formatearCliente(data));
   } catch (err) {
     next(err);
   }
@@ -201,6 +263,56 @@ app.put("/api/clientes/:id/telefono", authRequerido, async (req, res, next) => {
       body: { billing: { phone: telefono } },
     });
     res.json({ id: data.id, phone: data.billing?.phone });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.put("/api/clientes/:id", authRequerido, async (req, res, next) => {
+  try {
+    const { first_name, last_name, email, telefono } = req.body || {};
+    if (!first_name && !last_name && !email && !telefono) {
+      return res.status(400).json({ message: "No hay datos para actualizar" });
+    }
+    const body = {};
+    const billing = {};
+    if (first_name !== undefined) billing.first_name = String(first_name);
+    if (last_name !== undefined) billing.last_name = String(last_name);
+    if (telefono !== undefined) billing.phone = String(telefono);
+    if (email !== undefined) body.email = String(email);
+    if (Object.keys(billing).length) body.billing = billing;
+
+    const data = await wcFetch(`customers/${req.params.id}`, {
+      method: "PUT",
+      body,
+    });
+    res.json(formatearCliente(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---- Productos (escritura, protegido) ----
+app.post("/api/productos", authRequerido, async (req, res, next) => {
+  try {
+    const { error, payload } = armarProducto(req.body, true);
+    if (error) return res.status(400).json({ message: error });
+    const data = await wcFetch("products", { method: "POST", body: payload });
+    res.status(201).json(formatearProducto(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.put("/api/productos/:id", authRequerido, async (req, res, next) => {
+  try {
+    const { error, payload } = armarProducto(req.body, false);
+    if (error) return res.status(400).json({ message: error });
+    const data = await wcFetch(`products/${req.params.id}`, {
+      method: "PUT",
+      body: payload,
+    });
+    res.json(formatearProducto(data));
   } catch (err) {
     next(err);
   }

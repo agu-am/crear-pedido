@@ -34,6 +34,7 @@ const NavBar = () => {
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación">
+          <NavLink to="/productos" className={linkClass}>Productos</NavLink>
           <NavLink to="/ordenes" className={linkClass}>Órdenes</NavLink>
           <NavLink to="/clientes" className={linkClass}>Clientes</NavLink>
         </nav>

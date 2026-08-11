@@ -4,6 +4,7 @@ import { RiCloseCircleLine } from "react-icons/ri";
 import { notificarExito, notificarError } from "../helpers/toast";
 
 const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
+    const [first_name, setFirst_name] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [cargando, setCargando] = useState(false);
@@ -13,8 +14,9 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
         setCargando(true);
 
         try {
-            await api.post('/clientes', { username, email });
+            await api.post('/clientes', { first_name, username, email });
             setModalNuevoCliente(false);
+            setFirst_name('');
             setUsername('');
             setEmail('');
             notificarExito('Cliente agregado exitosamente');
@@ -48,6 +50,22 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <div>
+                        <label
+                            htmlFor="nuevo-nombre"
+                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+                        >
+                            Nombre
+                        </label>
+                        <input
+                            id="nuevo-nombre"
+                            type="text"
+                            value={first_name}
+                            onChange={(e) => setFirst_name(e.target.value)}
+                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        />
+                    </div>
+
                     <div>
                         <label
                             htmlFor="nuevo-username"

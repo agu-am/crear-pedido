@@ -47,7 +47,10 @@ Variables de `server/.env`:
 | `JWT_TOKEN_URL`      | `https://TU-SITIO/wp-json/jwt-auth/v1/token`. |
 | `CACHE_TTL`          | Segundos de caché para productos/clientes (por defecto 60). |
 
-Endpoints: `POST /api/login`, `GET /api/me`, `GET /api/productos`, `GET /api/clientes` (públicos de lectura), `GET|POST /api/ordenes`, `POST /api/clientes`, `PUT /api/clientes/:id/telefono` (requieren token).
+Endpoints públicos de lectura: `GET /api/productos`, `GET /api/clientes` (devuelven `{ items, page, totalPages }`).
+Endpoints protegidos (requieren token): `POST /api/login`, `GET /api/me`, `GET|POST /api/ordenes`, `POST /api/productos`, `PUT /api/productos/:id`, `POST /api/clientes`, `PUT /api/clientes/:id`, `PUT /api/clientes/:id/telefono`.
+
+> Para **crear/editar productos y clientes**, las claves de WooCommerce en `server/.env` deben tener permiso **Read/Write**. Con claves de solo lectura, la lectura funciona pero las escrituras devuelven error.
 
 ### 2. Frontend (`VITE_API_URL`)
 

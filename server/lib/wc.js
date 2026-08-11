@@ -6,7 +6,7 @@ const basicAuth = () =>
     `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
   ).toString("base64");
 
-export async function wcFetch(path, { method = "GET", query = {}, body } = {}) {
+async function wcFetchRaw(path, { method = "GET", query = {}, body } = {}) {
   const url = new URL(`${WC_URL}/wp-json/wc/v3/${path}`);
   Object.entries(query).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
@@ -39,7 +39,21 @@ export async function wcFetch(path, { method = "GET", query = {}, body } = {}) {
     throw err;
   }
 
+  return { data, res };
+}
+
+export async function wcFetch(path, opts = {}) {
+  const { data } = await wcFetchRaw(path, opts);
   return data;
+}
+
+export async function wcFetchPaginado(path, opts = {}) {
+  const { data, res } = await wcFetchRaw(path, opts);
+  return {
+    items: data,
+    page: Number(opts.query?.page || 1),
+    totalPages: Number(res.headers.get("x-wp-totalpages") || 0),
+  };
 }
 
 export async function validarCredenciales(username, password) {
