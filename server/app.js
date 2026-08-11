@@ -39,6 +39,30 @@ function leerCache(key) {
   return item.valor;
 }
 
+// Indice de SKUs (id -> sku) para busquedas parciales. Se construye una vez y se cachea.
+const indiceSku = new Map();
+let indiceSkuCargadoEn = 0;
+const INDICE_SKU_TTL = 10 * 60 * 1000;
+
+async function cargarIndiceSkus() {
+  if (indiceSkuCargadoEn && Date.now() - indiceSkuCargadoEn < INDICE_SKU_TTL) return;
+  const nuevo = new Map();
+  let page = 1;
+  for (;;) {
+    const r = await wcFetchPaginado("products", {
+      query: { _fields: "id,sku", per_page: 100, page },
+    });
+    r.items.forEach((p) => {
+      if (p.sku) nuevo.set(p.id, p.sku);
+    });
+    if (page >= r.totalPages || r.items.length === 0) break;
+    page++;
+  }
+  indiceSku.clear();
+  nuevo.forEach((v, k) => indiceSku.set(k, v));
+  indiceSkuCargadoEn = Date.now();
+}
+
 const formatearProducto = (p) => ({
   id: p.id,
   sku: p.sku,
@@ -276,24 +300,48 @@ app.get("/api/productos", async (req, res, next) => {
     let items = resultado.items.map(formatearProducto);
 
     // La busqueda de WooCommerce por `search` no cubre el SKU en este sitio:
-    // agrego una consulta por SKU exacto (solo en la primera pagina) y combino.
+    // se agregan resultados por SKU (exacto y coincidencia parcial) en la primera pagina.
     if (search && page === 1) {
+      const CAMPOS =
+        "id,name,sku,regular_price,sale_price,price,stock_quantity,stock_status,status,type,description";
+      const yaExiste = (id) => items.some((i) => i.id === id);
+
       try {
         const porSku = await wcFetchPaginado("products", {
-          query: {
-            _fields:
-              "id,name,sku,regular_price,sale_price,price,stock_quantity,stock_status,status,type,description",
-            sku: search,
-            per_page: 1,
-            page: 1,
-          },
+          query: { _fields: CAMPOS, sku: search, per_page: 1, page: 1 },
         });
         porSku.items.forEach((p) => {
           const fp = formatearProducto(p);
-          if (!items.some((i) => i.id === fp.id)) items.unshift(fp);
+          if (!yaExiste(fp.id)) items.unshift(fp);
         });
       } catch {
-        // si el filtro por sku falla, se ignora y queda la busqueda por nombre
+        // filtro sku no disponible: se ignora
+      }
+
+      // Coincidencia parcial de SKU (codigos con digitos): usa el indice cacheado.
+      if (/\d{3,}/.test(search)) {
+        try {
+          await cargarIndiceSkus();
+          const term = search.toLowerCase();
+          const ids = [];
+          for (const [id, sku] of indiceSku) {
+            if (sku.toLowerCase().includes(term)) {
+              ids.push(id);
+              if (ids.length >= 25) break;
+            }
+          }
+          if (ids.length) {
+            const encontrados = await wcFetchPaginado("products", {
+              query: { include: ids.join(","), per_page: 100, _fields: CAMPOS },
+            });
+            const extra = encontrados.items
+              .map(formatearProducto)
+              .filter((p) => !yaExiste(p.id));
+            items = [...extra, ...items];
+          }
+        } catch {
+          // si el indice no puede construirse, se ignora
+        }
       }
     }
 
