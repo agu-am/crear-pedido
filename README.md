@@ -54,12 +54,12 @@ Endpoints: `POST /api/login`, `GET /api/me`, `GET /api/productos`, `GET /api/cli
 Copiar `.env.example` → crear `.env`:
 
 ```bash
-VITE_API_URL=http://localhost:3000        # dev
+VITE_API_URL=http://localhost:3100        # dev
 # En producción:
 VITE_API_URL=https://TU-PROXY.dominio.com
 ```
 
-> `VITE_API_URL` se define **en el build**. No incluir credenciales con prefijo `VITE_` (quedarían visibles en el bundle).
+> `VITE_API_URL` se define **en el build** y es solo el origen (el código agrega `/api` automáticamente, p. ej. `https://TU-PROXY.dominio.com/api`). No incluir credenciales con prefijo `VITE_` (quedarían visibles en el bundle).
 
 ### 3. Login
 

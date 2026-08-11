@@ -15,6 +15,7 @@ app.use(
   cors({
     origin: (origin, cb) => {
       if (!origin || origenesPermitidos.includes(origin)) return cb(null, true);
+      if (/^http:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
       return cb(null, false);
     },
   })
