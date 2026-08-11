@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import api from "../helpers/api";
 import { formatearMoneda } from "../helpers";
 import { statsEjemplo } from "../helpers/statsEjemplo";
 import Error from "../components/Error";
 import { FaInfoCircle } from "react-icons/fa";
 import {
-  FaBoxOpen,
   FaClipboardList,
-  FaUsers,
   FaTruck,
   FaBoxes,
   FaCheckCircle,
@@ -63,12 +60,6 @@ const Admin = () => {
   useEffect(() => {
     cargar()
   }, [])
-
-  const accesos = [
-    { to: "/productos", icon: FaBoxOpen, iconCls: "bg-positive-pale text-positive-deep", titulo: "Productos", texto: "Gestionar el catálogo" },
-    { to: "/ordenes", icon: FaClipboardList, iconCls: "bg-canvas text-ink", titulo: "Órdenes", texto: "Ver los pedidos" },
-    { to: "/clientes", icon: FaUsers, iconCls: "bg-canvas text-ink", titulo: "Clientes", texto: "Crear y asignar vendedores" },
-  ]
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -158,22 +149,6 @@ const Admin = () => {
                 </ol>
               )}
             </section>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {accesos.map((c) => (
-              <Link
-                key={c.to}
-                to={c.to}
-                className="group rounded-3xl bg-canvas-soft p-6 transition hover:bg-canvas hover:shadow-card"
-              >
-                <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl shadow-card ${c.iconCls}`}>
-                  <c.icon size="1.4rem" />
-                </span>
-                <span className="block text-base font-bold text-ink">{c.titulo}</span>
-                <span className="mt-1 block text-sm text-mute">{c.texto}</span>
-              </Link>
-            ))}
           </div>
         </>
       )}
