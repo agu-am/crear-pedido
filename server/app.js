@@ -273,7 +273,31 @@ app.get("/api/productos", async (req, res, next) => {
         page,
       },
     });
-    resultado.items = resultado.items.map(formatearProducto);
+    let items = resultado.items.map(formatearProducto);
+
+    // La busqueda de WooCommerce por `search` no cubre el SKU en este sitio:
+    // agrego una consulta por SKU exacto (solo en la primera pagina) y combino.
+    if (search && page === 1) {
+      try {
+        const porSku = await wcFetchPaginado("products", {
+          query: {
+            _fields:
+              "id,name,sku,regular_price,sale_price,price,stock_quantity,stock_status,status,type,description",
+            sku: search,
+            per_page: 1,
+            page: 1,
+          },
+        });
+        porSku.items.forEach((p) => {
+          const fp = formatearProducto(p);
+          if (!items.some((i) => i.id === fp.id)) items.unshift(fp);
+        });
+      } catch {
+        // si el filtro por sku falla, se ignora y queda la busqueda por nombre
+      }
+    }
+
+    resultado.items = items;
     cachear(key, resultado);
     res.json(resultado);
   } catch (err) {
