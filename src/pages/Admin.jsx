@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../helpers/api";
 import { formatearMoneda } from "../helpers";
+import { statsEjemplo } from "../helpers/statsEjemplo";
 import Error from "../components/Error";
+import { FaInfoCircle } from "react-icons/fa";
 import {
   FaBoxOpen,
   FaClipboardList,
@@ -30,6 +32,8 @@ const Fila = ({ etiqueta, valor, destacado }) => (
   </div>
 )
 
+const usarStatsEjemplo = import.meta.env.VITE_MOCK_STATS === "true";
+
 const Admin = () => {
   const [stats, setStats] = useState(null)
   const [cargando, setCargando] = useState(true)
@@ -37,6 +41,14 @@ const Admin = () => {
 
   const cargar = async () => {
     setCargando(true)
+    if (usarStatsEjemplo) {
+      setTimeout(() => {
+        setStats(statsEjemplo)
+        setError(false)
+        setCargando(false)
+      }, 400)
+      return
+    }
     try {
       const { data } = await api.get("/stats")
       setStats(data)
@@ -61,7 +73,14 @@ const Admin = () => {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-display-xs text-ink">Panel</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-display-xs text-ink">Panel</h1>
+          {usarStatsEjemplo && (
+            <span className="flex items-center gap-1.5 rounded-full bg-warning px-3 py-1 text-xs font-semibold text-warning-content">
+              <FaInfoCircle size="0.75rem" /> Datos de ejemplo
+            </span>
+          )}
+        </div>
         <button
           onClick={cargar}
           className="rounded-full border border-ink px-4 py-2 text-sm font-semibold text-ink transition hover:bg-canvas-soft disabled:opacity-50"

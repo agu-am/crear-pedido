@@ -64,7 +64,7 @@ VITE_API_URL=https://TU-PROXY.dominio.com
 
 > `VITE_API_URL` se define **en el build** y es solo el origen (el código agrega `/api` automáticamente, p. ej. `https://TU-PROXY.dominio.com/api`). No incluir credenciales con prefijo `VITE_` (quedarían visibles en el bundle).
 
-Opcional en desarrollo: `VITE_MOCK_ORDENES=true` muestra **órdenes de ejemplo** en `/ordenes` (útil para diseñar sin datos). Para producción, **no definirla** (o `false`) para traer las órdenes reales.
+Opcional en desarrollo: `VITE_MOCK_ORDENES=true` muestra **órdenes de ejemplo** en `/ordenes` y `VITE_MOCK_STATS=true` muestra **estadísticas de ejemplo** en el panel (ambas útiles para diseñar sin datos; aparecen con un aviso "Datos de ejemplo"). Para producción, **no definirlas** (o `false`) para usar datos reales.
 
 ### 3. Login
 
