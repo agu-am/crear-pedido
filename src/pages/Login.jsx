@@ -33,37 +33,61 @@ function Login() {
   };
 
   return (
-    <div className='h-screen flex flex-col items-center justify-center gap-10'>
-      <h2 className='text-center uppercase font-bold'>Ingresar</h2>
-      <form onSubmit={handleLogin} className='flex flex-col items-center gap-10 w-full'>
-        <div className="mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1 xl:w-3/12">
-          <input
-            type="text"
-            placeholder="Usuario"
-            className="flex w-full bg-white text-xl text-black rounded border-white pt-2"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
+    <div className="flex min-h-screen items-center justify-center bg-canvas-soft px-4 py-10">
+      <div className="w-full max-w-sm rounded-3xl bg-canvas p-8 shadow-card">
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <img
+            className="h-14 w-14 rounded-2xl object-cover"
+            src="https://pedidospaul.agudev.com.ar/wp-content/uploads/2023/11/logoPedidosPaul.png"
+            alt="Logo de Pedidos Paul"
           />
+          <h1 className="text-display-xs text-ink">Ingresar</h1>
         </div>
-        <div className="mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1 xl:w-3/12">
-          <input
-            type="password"
-            placeholder="Contraseña"
-            className="flex w-full bg-white text-xl text-black rounded border-white pt-2"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={cargando}
-          className='w-6/12 rounded-md font-bold text-white uppercase p-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 xl:w-2/12 disabled:opacity-60'
-        >
-          {cargando ? 'Ingresando...' : 'Ingresar'}
-        </button>
-      </form>
+
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <div>
+            <label
+              htmlFor="usuario"
+              className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+            >
+              Usuario
+            </label>
+            <input
+              id="usuario"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+            >
+              Contraseña
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={cargando}
+            className="mt-1 w-full rounded-3xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99] disabled:opacity-60"
+          >
+            {cargando ? 'Ingresando...' : 'Ingresar'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

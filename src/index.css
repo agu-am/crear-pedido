@@ -1,10 +1,60 @@
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+@import "@fontsource/inter/900.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @layer base {
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
+  html {
+    @apply bg-canvas-soft text-ink;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  body {
+    @apply font-sans;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.select__control {
+  border-color: #0e0f0c !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  min-height: 44px;
+}
+.select__control:hover {
+  border-color: #0e0f0c !important;
+}
+.select__control--is-focused {
+  box-shadow: 0 0 0 2px #22c55e !important;
+}
+.select__menu {
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+.select__multi-value {
+  background-color: #e2f6d5 !important;
+  border-radius: 999px !important;
+}
+.select__multi-value__label {
+  color: #054d28 !important;
+}
+.select__multi-value__remove {
+  color: #054d28 !important;
+}
+.select__multi-value__remove:hover {
+  background-color: #c5edab !important;
+  color: #054d28 !important;
+}
+

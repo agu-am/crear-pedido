@@ -1,14 +1,7 @@
-
-const Error = ({ mensaje }) => {
-    return (
-        <div
-            className="border text-center border-red-400 bg-red-100 text-red-700 py-3 my-2 rounded-md uppercase"
-        >
-            <p>
-                {mensaje}
-            </p>
-        </div>
-    )
-}
+const Error = ({ mensaje }) => (
+    <div className="mb-4 rounded-3xl bg-negative-bg px-4 py-3 text-center text-sm font-semibold uppercase tracking-wide text-white">
+        <p>{mensaje}</p>
+    </div>
+)
 
 export default Error

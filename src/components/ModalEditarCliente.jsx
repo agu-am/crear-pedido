@@ -58,54 +58,69 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
 
     return (
         <div
-            className={
-                modalEditarCliente
-                    ? `fixed inset-0 z-30 overflow-y-auto flex items-center justify-center`
-                    : `hidden`
-            }
+            className={modalEditarCliente ? "fixed inset-0 z-40 flex items-center justify-center p-4" : "hidden"}
+            role="dialog"
+            aria-modal="true"
         >
-            <div className="flex items-start justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div
-                    className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-                    aria-hidden="true"
-                ></div>
-                <div className="flex flex-col max-w-xs p-8 text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-10 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
+            <div
+                className="absolute inset-0 bg-ink/50"
+                onClick={() => setModalEditarCliente(false)}
+            ></div>
+            <div className="relative w-full max-w-md rounded-3xl bg-canvas p-6 shadow-sheet">
+                <div className="mb-5 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-ink">Editar cliente</h2>
                     <button
-                        className="absolute right-1 top-1"
                         onClick={() => setModalEditarCliente(false)}
+                        className="text-mute transition hover:text-ink"
+                        aria-label="Cerrar"
                     >
-                        <RiCloseCircleLine size={"2rem"} className="text-gray-400" />
+                        <RiCloseCircleLine size="1.5rem" />
                     </button>
-                    <div className="flex flex-col gap-5 xl:w-full ">
-                        <div className="text-center text-3xl p-3 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">
-                            Editar Cliente
-                        </div>
-                        <div className="flex-row">
-                            <AsyncSelect
-                                isMulti
-                                options={clientes.map(cliente => ({
-                                    value: cliente.id,
-                                    label: cliente.name,
-                                }))}
-                                loadOptions={loadOptions}
-                                onChange={(value) => setIdsClientes(value)}
-                            />
-                        </div>
+                </div>
 
-                        <label htmlFor="vendedor">Vendedor</label>
-                        <select id="vendedor" value={telefono} onChange={(e) => setTelefono(e.target.value)}>
+                <div className="flex flex-col gap-4">
+                    <div>
+                        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute">
+                            Clientes
+                        </label>
+                        <AsyncSelect
+                            isMulti
+                            options={clientes.map(cliente => ({
+                                value: cliente.id,
+                                label: cliente.name,
+                            }))}
+                            loadOptions={loadOptions}
+                            onChange={(value) => setIdsClientes(value)}
+                            classNamePrefix="select"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="vendedor"
+                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+                        >
+                            Vendedor
+                        </label>
+                        <select
+                            id="vendedor"
+                            value={telefono}
+                            onChange={(e) => setTelefono(e.target.value)}
+                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        >
                             <option value="">Seleccionar...</option>
                             {vendedores.map((v) => (
                                 <option key={v.value} value={v.value}>{v.label}</option>
                             ))}
                         </select>
-                        <button
-                            className="text-center text-xl p-2 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600"
-                            onClick={() => { actualizarTelefonos(telefono) }}
-                        >
-                            Guardar cambios
-                        </button>
                     </div>
+
+                    <button
+                        onClick={() => { actualizarTelefonos(telefono) }}
+                        className="w-full rounded-3xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]"
+                    >
+                        Guardar cambios
+                    </button>
                 </div>
             </div>
         </div>

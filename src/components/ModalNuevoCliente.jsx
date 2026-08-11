@@ -46,65 +46,69 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
 
     return (
         <div
-            className={
-                modalNuevoCliente
-                    ? `fixed inset-0 z-30 overflow-y-auto flex items-center justify-center`
-                    : `hidden`
-            }
+            className={modalNuevoCliente ? "fixed inset-0 z-40 flex items-center justify-center p-4" : "hidden"}
+            role="dialog"
+            aria-modal="true"
         >
-            <div className="flex items-start justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div
-                    className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-                    aria-hidden="true"
-                ></div>
-                <div className="flex flex-col w-10/12 p-8 text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-10 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
+            <div
+                className="absolute inset-0 bg-ink/50"
+                onClick={() => setModalNuevoCliente(false)}
+            ></div>
+            <div className="relative w-full max-w-md rounded-3xl bg-canvas p-6 shadow-sheet">
+                <div className="mb-5 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-ink">Nuevo cliente</h2>
                     <button
-                        className="absolute right-1 top-1"
                         onClick={() => setModalNuevoCliente(false)}
+                        className="text-mute transition hover:text-ink"
+                        aria-label="Cerrar"
                     >
-                        <RiCloseCircleLine size={"2rem"} className="text-gray-400" />
+                        <RiCloseCircleLine size="1.5rem" />
                     </button>
-                    <div className="flex flex-col gap-5 xl:w-full ">
-                        <div className="text-center text-3xl p-3 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">
-                            Añadir Cliente
-                        </div>
-                        <div className="flex justify-center items-center w-full">
-                            <form
-                                className="flex flex-col gap-2 items-center justify-center xl: h-2/4"
-                                onSubmit={handleSubmit}
-                            >
-                                <div className="mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1">
-                                    <input
-                                        className="flex bg-white text-xl text-black rounded border-white pt-2"
-                                        type="text"
-                                        placeholder="Username"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="mb-2 self-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded pb-1">
-                                    <input
-                                        className="flex bg-white text-xl text-black rounded border-white pt-2"
-                                        type="email"
-                                        placeholder="Email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <button
-                                    className='w-full rounded-md font-bold text-white uppercase p-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 disabled:opacity-60'
-                                    type="submit"
-                                    disabled={cargando}
-                                >
-                                    {cargando ? 'Agregando...' : 'Agregar Cliente'}
-                                </button>
-                            </form>
-                        </div>
-                    </div>
                 </div>
+
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <div>
+                        <label
+                            htmlFor="nuevo-username"
+                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+                        >
+                            Username
+                        </label>
+                        <input
+                            id="nuevo-username"
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="nuevo-email"
+                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+                        >
+                            Email
+                        </label>
+                        <input
+                            id="nuevo-email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        />
+                    </div>
+
+                    <button
+                        className="mt-1 w-full rounded-3xl bg-brand-600 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99] disabled:opacity-60"
+                        type="submit"
+                        disabled={cargando}
+                    >
+                        {cargando ? 'Agregando...' : 'Agregar Cliente'}
+                    </button>
+                </form>
             </div>
         </div>
     );

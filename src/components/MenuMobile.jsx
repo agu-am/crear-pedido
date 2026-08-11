@@ -4,28 +4,46 @@ import { Link } from 'react-router-dom'
 
 const MenuMobile = () => {
     const { setToggleMenu } = usePedido()
+    const links = [
+        { to: '/', label: 'Inicio' },
+        { to: '/ordenes', label: 'Órdenes' },
+        { to: '/clientes', label: 'Clientes' },
+    ]
     return (
-        <div className='xl:hidden'>
-            <div className='absolute inset-0 opacity-25 bg-black w-screen h-screen'></div>
-            <div className='fixed left-0 top-0 z-30 opacity-100 bg-white rounded-e-xl w-8/12 h-full'>
-                <div className='flex justify-between items-center p-5'>
-                    <Link to='/'>
+        <div className="lg:hidden">
+            <div
+                className="fixed inset-0 z-40 bg-ink/50"
+                onClick={() => setToggleMenu(false)}
+            ></div>
+            <div className="fixed left-0 top-0 z-50 flex h-full w-8/12 max-w-xs flex-col rounded-r-3xl bg-canvas shadow-sheet">
+                <div className="flex items-center justify-between p-5">
+                    <Link to="/" onClick={() => setToggleMenu(false)}>
                         <img
-                            className='w-2/12'
+                            className="h-10 w-10 rounded-2xl object-cover"
                             src="https://pedidospaul.agudev.com.ar/wp-content/uploads/2023/11/logoPedidosPaul.png"
-                            alt="Logo Pedidos Paul"
+                            alt="Logo de Pedidos Paul"
                         />
                     </Link>
-                    <RxCross2
+                    <button
                         onClick={() => setToggleMenu(false)}
-                        size="2rem"
-                    />
+                        className="text-mute transition hover:text-ink"
+                        aria-label="Cerrar menú"
+                    >
+                        <RxCross2 size="1.5rem" />
+                    </button>
                 </div>
-                <ul className='flex flex-col gap-4 text-center px-5 uppercase font-bold'>
-                    <li><Link onClick={() => setToggleMenu(false)} to='/'>Inicio</Link></li>
-                    {/* <li><Link onClick={() => setToggleMenu(false)} to='/login'>Ingresar</Link></li> */}
-                    <li><Link onClick={() => setToggleMenu(false)} to='/ordenes'>Ordenes</Link></li>
-                    <li><Link onClick={() => setToggleMenu(false)} to='/clientes'>Clientes</Link></li>
+                <ul className="divide-y divide-canvas-soft px-3">
+                    {links.map((l) => (
+                        <li key={l.to}>
+                            <Link
+                                onClick={() => setToggleMenu(false)}
+                                to={l.to}
+                                className="block px-3 py-4 text-sm font-semibold text-ink"
+                            >
+                                {l.label}
+                            </Link>
+                        </li>
+                    ))}
                 </ul>
             </div>
         </div>

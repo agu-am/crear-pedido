@@ -6,7 +6,7 @@ import { RiCloseCircleLine } from "react-icons/ri";
 import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
 
-const Modal = () => {
+const ModalPedido = () => {
   const {
     modalPedido,
     setModalPedido,
@@ -18,22 +18,18 @@ const Modal = () => {
     setPedido,
     validarCliente,
     handleEnviarPedido,
+    total,
   } = usePedido();
 
   const handleCantidadChange = (sku, newCantidad) => {
-    setPedido((prevPedido) => {
-      const actualizarPedido = prevPedido.productos.map((producto) => {
-        if (producto.sku === sku) {
-          return { ...producto, quantity: Number(newCantidad) };
-        }
-        return producto;
-      });
-
-      return {
-        ...prevPedido,
-        productos: actualizarPedido,
-      };
-    });
+    setPedido((prevPedido) => ({
+      ...prevPedido,
+      productos: prevPedido.productos.map((producto) =>
+        producto.sku === sku
+          ? { ...producto, quantity: Number(newCantidad) }
+          : producto
+      ),
+    }));
     toast.success("Producto actualizado correctamente!", {
       position: "top-center",
       autoClose: 500,
@@ -48,146 +44,141 @@ const Modal = () => {
   };
 
   const handleBorrarProducto = (producto) => {
-    setPedido((prevPedido) => {
-      const nuevoPedido = prevPedido.productos.filter(
-        (p) => p.sku !== producto.sku
-      );
-      toast.error("Producto eliminado correctamente!", {
-        position: "top-center",
-        autoClose: 500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        toastId: "actualizar",
-      });
-
-      return { ...prevPedido, productos: nuevoPedido };
+    setPedido((prevPedido) => ({
+      ...prevPedido,
+      productos: prevPedido.productos.filter((p) => p.sku !== producto.sku),
+    }));
+    toast.error("Producto eliminado correctamente!", {
+      position: "top-center",
+      autoClose: 500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      toastId: "actualizar",
     });
   };
+
   return (
     <div
-      className={
-        modalPedido
-          ? `fixed inset-0 z-30 overflow-y-auto`
-          : `hidden fixed inset-0 z-10 overflow-y-auto`
-      }
-      aria-labelledby="modal-title"
+      className={modalPedido ? "fixed inset-0 z-40 lg:hidden" : "hidden"}
       role="dialog"
       aria-modal="true"
+      aria-labelledby="modal-pedido-title"
     >
-      <div className="flex items-start justify-center min- px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div
-          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-          aria-hidden="true"
-        ></div>
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:"
-          aria-hidden="true"
-        >
+      <div
+        className="absolute inset-0 bg-ink/50"
+        onClick={() => setModalPedido(false)}
+      ></div>
 
-        </span>
-        <div className="flex flex-col w-11/12 p-5 pt-10 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-2xl lg:p-16 sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
+      <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] animate-slide-up flex-col rounded-t-3xl bg-canvas shadow-sheet">
+        <div className="flex justify-center pb-1 pt-3">
+          <span className="h-1.5 w-10 rounded-full bg-canvas-soft"></span>
+        </div>
+
+        <div className="flex items-center justify-between px-5 pb-2 pt-1">
+          <h2 id="modal-pedido-title" className="text-lg font-bold text-ink">
+            Tu pedido
+          </h2>
           <button
-            className="absolute right-1 top-1"
             onClick={() => setModalPedido(false)}
+            className="text-mute transition hover:text-ink"
+            aria-label="Cerrar"
           >
-            <RiCloseCircleLine size={"2rem"} className="text-gray-400" />
+            <RiCloseCircleLine size="1.6rem" />
           </button>
-          <div className="flex flex-col xl:w-4/12">
-            {validarCliente && <Error mensaje={"FALTA COLOCAR CLIENTE"} />}
+        </div>
 
-            <div className="text-center text-3xl uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">
-              Pedido
-            </div>
+        <div className="flex-1 overflow-y-auto px-5">
+          {validarCliente && <Error mensaje={"Falta colocar cliente"} />}
+          {pedido.productos.length === 0 && (
+            <Error mensaje={"No hay productos agregados"} />
+          )}
 
-            {pedido.productos.length === 0 && (
-              <Error mensaje={"No hay productos agregados"} />
-            )}
-
-            <div className="flex-row">
-              {pedido.productos?.map((p) => (
-                <div
-                  key={p.sku}
-                  className="grid grid-cols-[1fr_30px] border"
-                >
-                  <button
-                    className="col-start-2 row-start-1 row-span-2 text-red-600"
-                    onClick={() => handleBorrarProducto(p)}
-                  >
-                    <FaTrashAlt size="1.5rem" />
-                  </button>
-                  <p className="text-sm text-center font-bold uppercase">
-                    {p.name}
-                  </p>
-                  <div className="flex w-full justify-center border-gray-200 rounded p-2">
-                      <button
-                        type="button"
-                        className="flex h-6 w-6 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
-                        onClick={() =>
-                          handleDisminuirProducto(
-                            p,
-                            "Producto actualizado correctamente!"
-                          )
-                        }
-                      >
-                        <FaMinus size={".6rem"} />
-                      </button>
-                      <input
-                        type="number"
-                        id="quantity"
-                        value={p.quantity === 0 ? "" : p.quantity}
-                        onChange={(e) =>
-                          handleCantidadChange(p.sku, e.target.value)
-                        }
-                        className="h-5 w-8 border-transparent text-center sm:text-sm"
-                      />
-
-                      <button
-                        type="button"
-                        className="flex h-6 w-6 items-center justify-center self-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br rounded-lg"
-                        onClick={() =>
-                          handleAumentarProducto(
-                            p,
-                            "Producto actualizado correctamente!"
-                          )
-                        }
-                      >
-                        <FaPlus size={".9rem"} />
-                      </button>
-                  </div>
+          <ul className="divide-y divide-canvas-soft">
+            {pedido.productos.map((p) => (
+              <li key={p.sku} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-ink">{p.name}</p>
+                  <p className="mt-0.5 text-xs text-mute">${p.price} c/u</p>
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="mt-2">
-            <h2 className="font-bold uppercase">Observaciones</h2>
+
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleDisminuirProducto(p, "Producto actualizado correctamente!")
+                    }
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-ink text-ink transition hover:bg-canvas-soft"
+                    aria-label="Disminuir"
+                  >
+                    <FaMinus size="0.6rem" />
+                  </button>
+                  <input
+                    type="number"
+                    value={p.quantity === 0 ? "" : p.quantity}
+                    onChange={(e) => handleCantidadChange(p.sku, e.target.value)}
+                    className="h-8 w-10 border-0 text-center text-sm font-bold text-ink focus:outline-none"
+                    aria-label="Cantidad"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleAumentarProducto(p, "Producto actualizado correctamente!")
+                    }
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700"
+                    aria-label="Aumentar"
+                  >
+                    <FaPlus size="0.7rem" />
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleBorrarProducto(p)}
+                  className="shrink-0 text-negative transition hover:opacity-80"
+                  aria-label="Eliminar producto"
+                >
+                  <FaTrashAlt size="1rem" />
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <div className="py-4">
+            <label
+              htmlFor="observaciones-mobile"
+              className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
+            >
+              Observaciones
+            </label>
             <textarea
-              type="text"
-              className="w-full border"
+              id="observaciones-mobile"
+              rows={2}
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
+              className="w-full resize-none rounded-xl border border-ink bg-canvas p-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>
-          <div className="w-full mx-auto mt-4 overflow-hidden rounded-lg wt-10 sm:flex">
-            <div className="flex justify-center w-full">
-              <a
-                onClick={(e) => handleEnviarPedido(e)}
-                className="flex items-center justify-center py-2 rounded-md w-10/12 text-xl uppercase font-bold text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 sm:text-2xl"
-              >
-                Enviar pedido{" "}
-                <span className="ml-2">
-                  <BsWhatsapp size="2rem" />
-                </span>
-              </a>
-            </div>
+        </div>
+
+        <div className="border-t border-canvas-soft px-5 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm text-mute">Total</p>
+            <p className="text-2xl font-extrabold text-ink">${total}</p>
           </div>
+          <button
+            onClick={(e) => handleEnviarPedido(e)}
+            className="flex w-full items-center justify-center gap-2 rounded-3xl bg-brand-600 py-4 text-base font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]"
+          >
+            Enviar pedido <BsWhatsapp size="1.3rem" />
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default Modal;
+export default ModalPedido;

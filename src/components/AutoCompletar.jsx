@@ -23,15 +23,12 @@ const SearchAutoCompletar = () => {
     }))
   }
 
-  const formatResult = (item) => {
-    return (
-      <span style={{ display: 'block', textAlign: 'center' }}>{item.name}</span>
-    )
-  }
+  const formatResult = (item) => (
+    <span className="block px-2 py-1.5 text-left text-sm text-ink">{item.name}</span>
+  )
 
   return (
-    <div className='w-full py-2 px-2 flex flex-col justify-center self-center rounded-md xl:w-6/12 col-start-1 col-end-2 row-start-1 row-end-2'>
-      <h2 className='font-bold uppercase'>Ingresar Cliente:</h2>
+    <div className="w-full">
       <ReactSearchAutocomplete
         items={clientes}
         onSearch={handleOnSearch}
@@ -40,17 +37,22 @@ const SearchAutoCompletar = () => {
         inputSearchString={clienteInputSearch}
         onClear={handleLimpiarCliente}
         formatResult={formatResult}
+        placeholder="Buscar cliente..."
         showIcon={true}
         styling={{
-          height: "34px",
-          borderRadius: "4px",
-          backgroundColor: "white",
+          height: "44px",
+          borderRadius: "12px",
+          border: "1px solid #0e0f0c",
+          backgroundColor: "#ffffff",
           boxShadow: "none",
-          fontSize: "16px",
-          placeholderColor: "darkgreen",
+          fontSize: "14px",
+          fontFamily: "Inter, system-ui, sans-serif",
+          placeholderColor: "#868685",
+          iconColor: "#0e0f0c",
+          color: "#0e0f0c",
+          hoverBackgroundColor: "#e8ebe6",
+          zIndex: 50,
           clearIconMargin: "3px 8px 0 0",
-          zIndex: 2,
-          fontWigth: "bold",
         }}
       />
     </div>
