@@ -93,6 +93,23 @@ El proxy valida usuario/contraseña contra el endpoint `jwt-auth` del sitio y em
 3. **Limitar `/wp-json/wp/v2/users`**: ese endpoint respondió 200 sin autenticación (lista de usuarios pública). Restringir su acceso en el servidor (regla de firewall/apache) o bloquearlo con un plugin de seguridad.
 4. El endpoint `GET /api/clientes` es público de lectura (id, nombre, email, teléfono) porque la pantalla de Home lo necesita. Si se requiere, protegerlo con token y moverlo detrás del login.
 
+## Deploy en Netlify (test)
+
+El proyecto incluye `netlify.toml` que despliega frontend + API en un solo sitio:
+- Frontend: `npm run build` → `dist/`.
+- API: la carpeta `netlify/functions/` expone el mismo proxy Express como Netlify Function (bundler **esbuild**, necesario para que `serverless-http` funcione).
+- El build usa `VITE_API_URL=/.netlify/functions/api` y apaga los modos de ejemplo (`VITE_MOCK_ORDENES=false`, `VITE_MOCK_STATS=false`).
+
+**Variables de entorno en Netlify** (Settings → Environment variables): `WC_URL`, `WC_CONSUMER_KEY`, `WC_CONSUMER_SECRET`, `JWT_SECRET`, `JWT_TOKEN_URL`, `CORS_ORIGIN=*`, `CACHE_TTL`.
+
+```bash
+netlify sites:create --name TU-SITIO
+netlify env:set WC_URL https://pedidospaul.agudev.com.ar   # + las demás
+netlify deploy --prod
+```
+
+> Nota: no versionar el token ni las claves. `node_bundler = "esbuild"` está fijado en `netlify.toml` para evitar el error "Unsupported framework" del bundler por defecto.
+
 ## Desarrollo
 
 ```bash
