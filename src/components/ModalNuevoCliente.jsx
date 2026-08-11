@@ -1,46 +1,49 @@
 import { useState } from "react";
-import usePedido from "../hooks/usePedido";
-import Error from "./Error";
-import axios from "axios";
+import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
 import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
-import AsyncSelect from 'react-select/async'
 
 const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const predefinedPassword = 'Bplmcfc10';
-    const token = localStorage.getItem('token');
+    const [cargando, setCargando] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        const data = {
-            username: username,
-            password: predefinedPassword,
-            email: email,
-            roles: ['customer']
-        };
-
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        };
+        setCargando(true);
 
         try {
-            const response = await axios.post('https://pedidosprueba.agustinjs.com/wp-json/wp/v2/users', data, config);
-            console.log('User added successfully', response.data);
+            await api.post('/clientes', { username, email });
             setModalNuevoCliente(false);
-            toast.success('Cliente agregado exitosamente');
-
+            setUsername('');
+            setEmail('');
+            toast.success('Cliente agregado exitosamente', {
+                position: 'top-center',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'colored',
+            });
         } catch (error) {
-            console.error('Error adding user', error);
-            console.error(error.response.data.message);
+            toast.error(error?.response?.data?.message || 'Error al agregar cliente', {
+                position: 'top-center',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'colored',
+            });
+        } finally {
+            setCargando(false);
         }
-    }
+    };
+
     return (
         <div
             className={
@@ -62,7 +65,6 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
                         <RiCloseCircleLine size={"2rem"} className="text-gray-400" />
                     </button>
                     <div className="flex flex-col gap-5 xl:w-full ">
-
                         <div className="text-center text-3xl p-3 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">
                             Añadir Cliente
                         </div>
@@ -76,6 +78,7 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
                                         className="flex bg-white text-xl text-black rounded border-white pt-2"
                                         type="text"
                                         placeholder="Username"
+                                        value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         required
                                     />
@@ -86,15 +89,17 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
                                         className="flex bg-white text-xl text-black rounded border-white pt-2"
                                         type="email"
                                         placeholder="Email"
+                                        value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
                                     />
                                 </div>
                                 <button
-                                    className='w-full rounded-md font-bold text-white uppercase p-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600'
+                                    className='w-full rounded-md font-bold text-white uppercase p-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 disabled:opacity-60'
                                     type="submit"
+                                    disabled={cargando}
                                 >
-                                    Agregar Cliente
+                                    {cargando ? 'Agregando...' : 'Agregar Cliente'}
                                 </button>
                             </form>
                         </div>
@@ -102,7 +107,7 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default ModalNuevoCliente
+export default ModalNuevoCliente;

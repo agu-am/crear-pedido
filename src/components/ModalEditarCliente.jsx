@@ -1,13 +1,13 @@
 import { useState } from "react";
 import usePedido from "../hooks/usePedido";
-import Error from "./Error";
-import axios from "axios";
+import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
 import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
-import AsyncSelect from 'react-select/async'
-const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
+import AsyncSelect from "react-select/async";
+import { vendedores } from "../helpers/vendedores";
 
+const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
     const { clientes, setBusquedaCliente } = usePedido();
 
     const [idsClientes, setIdsClientes] = useState({});
@@ -19,36 +19,40 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
             value: cliente.id,
             label: cliente.name,
         })));
-    }
-    const actualizarTelefonoCliente = async (clienteId, telefono) => {
-        try {
-            const response = await axios.put(`https://pedidosprueba.agustinjs.com/wp-json/wc/v3/customers/${clienteId}`, {
-                billing: {
-                    phone: telefono
-                }
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+    };
 
-            if (response.status === 200) {
-                setModalEditarCliente(false)
-            } else {
-                console.log('Hubo un problema al actualizar el número de teléfono');
-            }
-        } catch (error) {
-            console.error('Hubo un error al hacer la solicitud:', error);
-        }
-    }
+    const actualizarTelefonoCliente = async (clienteId, telefono) => {
+        await api.put(`/clientes/${clienteId}/telefono`, { telefono });
+    };
 
     const actualizarTelefonos = async (nuevoTelefono) => {
-        const promesas = idsClientes.map(clientes => actualizarTelefonoCliente(clientes.value, nuevoTelefono));
+        const promesas = idsClientes.map(cliente =>
+            actualizarTelefonoCliente(cliente.value, nuevoTelefono)
+        );
         try {
             await Promise.all(promesas);
-            toast.success('Número de teléfono actualizado con éxito');
+            setModalEditarCliente(false);
+            toast.success('Número de teléfono actualizado con éxito', {
+                position: 'top-center',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'colored',
+            });
         } catch (error) {
-            console.error('Hubo un error al hacer las solicitudes:', error);
+            toast.error('Hubo un error al hacer las solicitudes', {
+                position: 'top-center',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'colored',
+            });
         }
     };
 
@@ -73,7 +77,6 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                         <RiCloseCircleLine size={"2rem"} className="text-gray-400" />
                     </button>
                     <div className="flex flex-col gap-5 xl:w-full ">
-
                         <div className="text-center text-3xl p-3 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600">
                             Editar Cliente
                         </div>
@@ -90,13 +93,11 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                         </div>
 
                         <label htmlFor="vendedor">Vendedor</label>
-                        <select name="" id="vendedor" value={telefono} onChange={(e) => setTelefono(e.target.value)}>
-                            <option value="543415617384">Santiago</option>
-                            <option value="543416369777">Luis Ramirez</option>
-                            <option value="543416520721">JUANJO</option>
-                            <option value="543412641951">Javier</option>
-                            <option value="543416525090">Emanuel</option>
-                            <option value="543413384599">Paul</option>
+                        <select id="vendedor" value={telefono} onChange={(e) => setTelefono(e.target.value)}>
+                            <option value="">Seleccionar...</option>
+                            {vendedores.map((v) => (
+                                <option key={v.value} value={v.value}>{v.label}</option>
+                            ))}
                         </select>
                         <button
                             className="text-center text-xl p-2 rounded-lg uppercase text-white font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600"
@@ -108,7 +109,7 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default ModalEditarCliente
+export default ModalEditarCliente;

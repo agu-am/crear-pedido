@@ -18,7 +18,6 @@ const Modal = () => {
     setPedido,
     validarCliente,
     handleEnviarPedido,
-    total
   } = usePedido();
 
   const handleCantidadChange = (sku, newCantidad) => {
@@ -47,11 +46,6 @@ const Modal = () => {
       toastId: "actualizar",
     });
   };
-
-  const multiplicarPrecioCantidad = (precio, cantidad) => {
-    const total = precio * cantidad
-    return total.toFixed(2)
-  }
 
   const handleBorrarProducto = (producto) => {
     setPedido((prevPedido) => {

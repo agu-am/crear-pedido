@@ -1,86 +1,142 @@
-import React, { useState, useEffect, createContext } from "react";
-import axios from "axios";
-import "react-toastify/dist/ReactToastify.css";
+import { useState, useEffect, createContext, useCallback } from "react";
+import api from "../helpers/api";
 import { toast } from "react-toastify";
 
 const PedidosContext = createContext();
 
+const PEDIDO_VACIO = {
+  product_id: "",
+  sku: "",
+  cliente: "",
+  productos: [],
+  total: 0,
+};
+
 const PedidosProvider = ({ children }) => {
   const [productos, setProductos] = useState([]);
-  const [total, setTotal] = useState();
+  const [total, setTotal] = useState(0);
   const [busqueda, setBusqueda] = useState("");
-  const [pedido, setPedido] = useState({
-    product_id: " ",
-    sku: " ",
-    cliente: " ",
-    productos: [],
-    total,
-  });
+  const [pedido, setPedido] = useState(PEDIDO_VACIO);
   const [modalPedido, setModalPedido] = useState(false);
   const [clientes, setClientes] = useState([]);
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [cargandoProductos, setCargandoProductos] = useState(true);
+  const [cargandoMasProductos, setCargandoMasProductos] = useState(false);
+  const [errorProductos, setErrorProductos] = useState(false);
+  const [errorClientes, setErrorClientes] = useState(false);
   const [validarCliente, setValidarCliente] = useState(false);
   const [clienteInputSearch, setClienteInputSearch] = useState("");
-  const [ordenes, setOredenes] = useState([]);
+  const [ordenes, setOrdenes] = useState([]);
+  const [errorOrdenes, setErrorOrdenes] = useState(false);
   const [toggleMenu, setToggleMenu] = useState(false);
+  const [paginaProductos, setPaginaProductos] = useState(1);
+  const [hayMasProductos, setHayMasProductos] = useState(false);
 
   const productosPorPagina = 25;
 
-  const url = `https://pedidospaul.agudev.com.ar/wp-json/wc/v3/products?_fields=id,name,sku,price,description&search=${busqueda}&per_page=${productosPorPagina}&consumer_key=${import.meta.env.VITE_API_KEY
-    }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-  const urlClientes = `https://pedidospaul.agudev.com.ar/wp-json/wc/v3/customers?_fields=id,username,billing&search=${busquedaCliente}&consumer_key=${import.meta.env.VITE_API_KEY
-    }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-  const urlOrdenes = `https://pedidospaul.agudev.com.ar/wp-json/wc/v3/orders?_fields=id,billing,line_items,date_created,customer_note&per_page=50&consumer_key=${import.meta.env.VITE_API_KEY
-    }&consumer_secret=${import.meta.env.VITE_API_KEY_SECRET}`;
-
-  const obtenerProductos = async () => {
-    try {
-      const { data } = await axios.get(url);
-      const productosFormateados = data.map((p) => ({
-        id: p.id,
-        sku: p.sku,
-        name: p.name,
-        quantity: 0,
-        price: p.price,
-        description: p.description.replace(/<\/?[^>]+(>|$)/g, ""),
-      }));
-      setCargandoProductos(false);
-      setProductos(productosFormateados);
-    } catch (error) {
-      console.error("Error al obtener productos:", error);
-    }
-  };
+  const obtenerProductos = useCallback(
+    async (pagina = 1, acumular = false) => {
+      try {
+        setErrorProductos(false);
+        const { data } = await api.get("/productos", {
+          params: {
+            search: busqueda,
+            page: pagina,
+            per_page: productosPorPagina,
+          },
+        });
+        setProductos((prev) =>
+          acumular ? [...prev, ...data] : data
+        );
+        setHayMasProductos(data.length === productosPorPagina);
+      } catch (error) {
+        setErrorProductos(true);
+      } finally {
+        setCargandoProductos(false);
+        setCargandoMasProductos(false);
+      }
+    },
+    [busqueda]
+  );
 
   useEffect(() => {
-    obtenerProductos();
-  }, [busqueda]);
+    setCargandoProductos(true);
+    const timer = setTimeout(() => {
+      setPaginaProductos(1);
+      obtenerProductos(1, false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [busqueda, obtenerProductos]);
+
+  const cargarMasProductos = () => {
+    if (cargandoMasProductos) return;
+    const siguiente = paginaProductos + 1;
+    setPaginaProductos(siguiente);
+    setCargandoMasProductos(true);
+    obtenerProductos(siguiente, true);
+  };
+
+  const obtenerClientes = useCallback(async () => {
+    try {
+      setErrorClientes(false);
+      const { data } = await api.get("/clientes", {
+        params: { search: busquedaCliente },
+      });
+      setClientes(data);
+    } catch (error) {
+      setErrorClientes(true);
+    }
+  }, [busquedaCliente]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      obtenerClientes();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [busquedaCliente, obtenerClientes]);
+
+  const obtenerOrdenes = useCallback(async () => {
+    try {
+      setErrorOrdenes(false);
+      const { data } = await api.get("/ordenes");
+      setOrdenes(data);
+    } catch (error) {
+      setErrorOrdenes(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    obtenerOrdenes();
+  }, [obtenerOrdenes]);
 
   const handleAumentarProducto = (producto, mensaje) => {
     setPedido((prevPedido) => {
-      const productoExistente = prevPedido.productos?.find(
+      const productoExistente = prevPedido.productos.find(
         (p) => p.sku === producto.sku
       );
       if (productoExistente) {
-        const actualizarPedido = prevPedido.productos.map((p) =>
-          p.sku === producto.sku ? { ...p, quantity: p.quantity + 1 } : p
-        );
-        return { ...prevPedido, productos: actualizarPedido };
-      } else {
-        const nuevoProducto = {
-          product_id: producto.id,
-          name: producto.name,
-          sku: producto.sku,
-          quantity: 1,
-          price: producto.price,
-          description: producto.description,
-        };
         return {
           ...prevPedido,
-          productos: [...prevPedido.productos, nuevoProducto],
+          productos: prevPedido.productos.map((p) =>
+            p.sku === producto.sku ? { ...p, quantity: p.quantity + 1 } : p
+          ),
         };
       }
+      return {
+        ...prevPedido,
+        productos: [
+          ...prevPedido.productos,
+          {
+            product_id: producto.id,
+            name: producto.name,
+            sku: producto.sku,
+            quantity: 1,
+            price: producto.price,
+            description: producto.description,
+          },
+        ],
+      };
     });
     toast.success(mensaje, {
       position: "top-center",
@@ -92,32 +148,32 @@ const PedidosProvider = ({ children }) => {
       draggable: true,
       progress: undefined,
       theme: "colored",
-      toastId: 'actualizar',
+      toastId: "actualizar",
     });
   };
 
   const handleAgregarAlCarrito = (producto, mensaje) => {
     setPedido((prevPedido) => {
-      const productoExistente = prevPedido.productos?.find(
+      const productoExistente = prevPedido.productos.find(
         (p) => p.sku === producto.sku
       );
-      if (!productoExistente) {
-        const nuevoProducto = {
-          product_id: producto.id,
-          name: producto.name,
-          sku: producto.sku,
-          quantity: 1,
-          price: producto.price,
-          description: producto.description,
-        };
-        return {
-          ...prevPedido,
-          productos: [...prevPedido.productos, nuevoProducto],
-        };
-      }
-      return { ...prevPedido };
+      if (productoExistente) return prevPedido;
+      return {
+        ...prevPedido,
+        productos: [
+          ...prevPedido.productos,
+          {
+            product_id: producto.id,
+            name: producto.name,
+            sku: producto.sku,
+            quantity: 1,
+            price: producto.price,
+            description: producto.description,
+          },
+        ],
+      };
     });
-    setBusqueda(" ");
+    setBusqueda("");
     toast.success(mensaje, {
       position: "top-center",
       limit: 1,
@@ -131,17 +187,15 @@ const PedidosProvider = ({ children }) => {
     });
   };
 
-
   const handleDisminuirProducto = (producto, mensaje) => {
-    setPedido((prevPedido) => {
-      const actualizarPedido = prevPedido.productos
+    setPedido((prevPedido) => ({
+      ...prevPedido,
+      productos: prevPedido.productos
         .map((p) =>
           p.sku === producto.sku ? { ...p, quantity: p.quantity - 1 } : p
         )
-        .filter((p) => p.quantity > 0);
-
-      return { ...prevPedido, productos: actualizarPedido };
-    })
+        .filter((p) => p.quantity > 0),
+    }));
     toast.success(mensaje, {
       position: "top-center",
       limit: 1,
@@ -152,132 +206,94 @@ const PedidosProvider = ({ children }) => {
       draggable: true,
       progress: undefined,
       theme: "colored",
-      toastId: 'actualizar'
-    })
-  }
-
-  const obtenerClientes = async () => {
-    try {
-      const { data } = await axios.get(urlClientes);
-      const clientesFormateados = data.map((c) => ({
-        id: c.id,
-        name: c.username,
-        phone: c.billing.phone,
-      }));
-      setClientes(clientesFormateados);
-    } catch (error) {
-      console.error("Error al obtener clientes:", error);
-    }
+      toastId: "actualizar",
+    });
   };
-  const handleEnviarPedido = (e) => {
-    if (!pedido.cliente || (typeof pedido.cliente === 'string' && pedido.cliente.trim() === "")) {
-      e.preventDefault();
-      setValidarCliente(true);
-    } else {
-      let textoArray = [];
-      pedido.productos.forEach((p) =>
-        textoArray.push(`*${p.quantity}x* ${p.name}%0A`)
-      );
-      const textoParaWA = textoArray.join("");
-      crearOrden();
-      window.open(
-        `https://wa.me/${pedido.cliente.phone ? pedido.cliente.phone : "543413384599"}?text=Pedido de *${pedido.cliente.name}*%0A%0A${textoParaWA}%0A*Observaciones:*%0A${observaciones}&app`,
-        e.target.href,
-        "_blank"
-      );
-      setValidarCliente(false);
-      pedido.productos = []
-      pedido.cliente = "";
-      setModalPedido(false);
-      setBusqueda(" ")
-      setClienteInputSearch(" ");
-      setObservaciones(" ");
-      toast.success("Pedido realizado!", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        limit: 1,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-    }
-  };
-
-  useEffect(() => {
-    obtenerClientes();
-  }, [busquedaCliente]);
-
-  const obtenerOrdenes = async () => {
-    try {
-      const { data } = await axios.get(urlOrdenes);
-      setOredenes(data);
-    } catch (error) {
-      console.error("Error al obtener las ordenes de compra", error);
-    }
-  };
-
-  useEffect(() => {
-    obtenerOrdenes();
-  }, []);
 
   const crearOrden = async () => {
-    const apiUrl =
-      "https://pedidospaul.agudev.com.ar/wp-json/wc/v3/orders?per_page=50&";
-
+    const cliente = pedido.cliente || {};
     const orderDatos = {
-      payment_method: "bacs", // Método de pago (puede variar)
-      payment_method_title: "Transferencia bancaria",
-      set_paid: true,
       billing: {
-        first_name: pedido.cliente.name,
-        last_name: "Apellido del Cliente",
-        address_1: "Dirección de Facturación",
-        city: "Ciudad",
-        state: "Estado",
-        postcode: "Código Postal",
-        country: "País",
-        email: "correo@cliente.com",
-        phone: "123456789",
+        first_name: cliente.name || "",
+        last_name: "",
+        address_1: "",
+        city: "",
+        state: "",
+        postcode: "",
+        country: "AR",
+        email: cliente.email || "",
+        phone: cliente.phone || "",
       },
       shipping: {
-        first_name: "Nombre de Envío",
-        last_name: "Apellido de Envío",
-        address_1: "Dirección de Envío",
-        city: "Ciudad de Envío",
-        state: "Estado de Envío",
-        postcode: "Código Postal de Envío",
-        country: "País de Envío",
+        first_name: cliente.name || "",
+        last_name: "",
+        address_1: "",
+        city: "",
+        state: "",
+        postcode: "",
+        country: "AR",
       },
       line_items: pedido.productos,
       customer_note: observaciones,
     };
-
-    await axios
-      .post(apiUrl, orderDatos, {
-        auth: {
-          username: import.meta.env.VITE_API_KEY,
-          password: import.meta.env.VITE_API_KEY_SECRET,
-        },
-      })
-      .then((response) => {
-        console.log("Orden creada con éxito:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error al crear la orden:", error);
-      });
+    return api.post("/ordenes", orderDatos);
   };
 
-  const obtenerTotal = () => {
-    const total = pedido.productos.reduce((total, producto) => total + producto.quantity * parseFloat(producto.price), 0);
-    return total.toFixed(2);
+  const handleEnviarPedido = async (e) => {
+    if (e) e.preventDefault();
+    const cliente = pedido.cliente || {};
+
+    if (!cliente || (typeof cliente === "string" && cliente.trim() === "")) {
+      setValidarCliente(true);
+      return;
+    }
+    if (pedido.productos.length === 0) {
+      toast.error("No hay productos en el pedido");
+      return;
+    }
+    setValidarCliente(false);
+
+    try {
+      await crearOrden();
+    } catch (error) {
+      toast.error("No se pudo crear la orden. Revisá la conexión.");
+      return;
+    }
+
+    const textoParaWA = pedido.productos
+      .map((p) => `*${p.quantity}x* ${p.name}%0A`)
+      .join("");
+    const telefono = cliente.phone || "543413384599";
+    const texto = `Pedido de *${cliente.name}*%0A%0A${textoParaWA}%0A*Observaciones:*%0A${observaciones}`;
+    window.open(`https://wa.me/${telefono}?text=${texto}`, "_blank");
+
+    setPedido(PEDIDO_VACIO);
+    setObservaciones("");
+    setModalPedido(false);
+    setBusqueda("");
+    setClienteInputSearch("");
+
+    toast.success("Pedido realizado!", {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      limit: 1,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
   };
 
   useEffect(() => {
-    setTotal(obtenerTotal());
-  }, [pedido]);
+    const total = pedido.productos.reduce(
+      (acc, producto) =>
+        acc + producto.quantity * parseFloat(producto.price || 0),
+      0
+    );
+    setTotal(total.toFixed(2));
+  }, [pedido.productos]);
 
   return (
     <PedidosContext.Provider
@@ -297,6 +313,12 @@ const PedidosProvider = ({ children }) => {
         observaciones,
         setPedido,
         cargandoProductos,
+        cargandoMasProductos,
+        cargarMasProductos,
+        hayMasProductos,
+        errorProductos,
+        errorClientes,
+        errorOrdenes,
         validarCliente,
         setValidarCliente,
         clienteInputSearch,
@@ -307,7 +329,7 @@ const PedidosProvider = ({ children }) => {
         toggleMenu,
         setToggleMenu,
         handleAgregarAlCarrito,
-        total
+        total,
       }}
     >
       {children}

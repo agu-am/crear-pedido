@@ -1,40 +1,46 @@
 import usePedido from "../hooks/usePedido"
 import { formatearFecha, formatearHora } from "../helpers"
-
+import Error from "./Error"
 
 const ListadoOrdenes = () => {
-    const { ordenes } = usePedido()
+    const { ordenes, errorOrdenes } = usePedido()
+    if (errorOrdenes) {
+        return <Error mensaje={"No se pudieron cargar las órdenes"} />
+    }
     return (
         <div className="xl:grid grid-cols-5">
-            {ordenes.map(o => (
-                <div
-                    className="flex flex-col m-3"
-                    key={o.id}
-                >
-                    <div className="p-3 text-white font-bold text-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 rounded-t-xl"
+            {ordenes.map(o => {
+                const nombreCliente = o.billing?.first_name || ""
+                return (
+                    <div
+                        className="flex flex-col m-3"
+                        key={o.id}
                     >
-                        <p>FECHA: {formatearFecha(o.date_created)}</p>
-                        <p>HORA: {formatearHora(o.date_created)}</p>
-                        <p>{o.billing.first_name}</p>
-                    </div>
-                    <ul className="p-3 bg-slate-200 rounded-b-xl">
-                        {o.line_items.map(i => (
-                            <li
-                                key={i.id}
-                                className="flex gap-10 justify-between border-b-2 m-1 border-slate-300"
-                            >
-                                <p className="inline-block font-bold">{i.name}</p>
-                                <p className="inline-block">x{i.quantity}</p>
-                            </li>
-                        ))
-                        }
-                        <div>
-                            <p className="font-bold uppercase text-center mt-8 underline">Observaciones: </p>
-                            <p className="text-center">{o.customer_note}</p>
+                        <div className="p-3 text-white font-bold text-center bg-gradient-to-r from-green-400 via-green-500 to-green-600 rounded-t-xl"
+                        >
+                            <p>FECHA: {formatearFecha(o.date_created)}</p>
+                            <p>HORA: {formatearHora(o.date_created)}</p>
+                            {nombreCliente && <p>{nombreCliente}</p>}
                         </div>
-                    </ul>
-                </div>
-            ))}
+                        <ul className="p-3 bg-slate-200 rounded-b-xl">
+                            {o.line_items.map(i => (
+                                <li
+                                    key={i.id}
+                                    className="flex gap-10 justify-between border-b-2 m-1 border-slate-300"
+                                >
+                                    <p className="inline-block font-bold">{i.name}</p>
+                                    <p className="inline-block">x{i.quantity}</p>
+                                </li>
+                            ))
+                            }
+                            <div>
+                                <p className="font-bold uppercase text-center mt-8 underline">Observaciones: </p>
+                                <p className="text-center">{o.customer_note}</p>
+                            </div>
+                        </ul>
+                    </div>
+                )
+            })}
         </div>
     )
 }

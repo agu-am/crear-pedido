@@ -7,7 +7,14 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  ignorePatterns: [
+    'dist',
+    '.eslintrc.cjs',
+    'server',
+    'tailwind.config.js',
+    'postcss.config.js',
+    'vite.config.js',
+  ],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: '18.2' } },
   plugins: ['react-refresh'],
@@ -16,5 +23,7 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    // El proyecto es JSX sin PropTypes; se valida en runtime con datos reales.
+    'react/prop-types': 'off',
   },
 }

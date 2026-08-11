@@ -8,7 +8,6 @@ import { toast } from "react-toastify";
 const Sidebar = () => {
   const {
     pedido,
-    textoWA,
     observaciones,
     handleEnviarPedido,
     setObservaciones,
@@ -16,7 +15,6 @@ const Sidebar = () => {
     handleAumentarProducto,
     setPedido,
     validarCliente,
-    clientes,
   } = usePedido();
 
   const handleCantidadChange = (sku, newCantidad) => {
@@ -66,6 +64,7 @@ const Sidebar = () => {
       return { ...prevPedido, productos: nuevoPedido };
     });
   };
+
   return (
     <div className="hidden flex-col xl:flex justify-between py-2 h-screen w-full row-start-1 row-end-3">
       {validarCliente && <Error mensaje={"FALTA COLOCAR CLIENTE"} />}
@@ -137,13 +136,14 @@ const Sidebar = () => {
         <textarea
           type="text"
           className="w-full border"
+          value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
         />
       </div>
       <div className="flex items-center justify-center w-full">
         <a
           onClick={(e) => handleEnviarPedido(e)}
-          className="flex items-center justify-center w-10/12 uppercase text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-bold rounded-lg text-xl px-5 py-2.5 text-center"
+          className="flex items-center justify-center w-10/12 uppercase text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-bold rounded-lg text-xl px-5 py-2.5 text-center cursor-pointer"
         >
           Enviar pedido{" "}
           <span className="ml-2">
