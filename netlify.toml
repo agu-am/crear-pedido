@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+[build.environment]
+  VITE_API_URL = "/.netlify/functions/api"
+  VITE_MOCK_ORDENES = "false"
+  VITE_MOCK_STATS = "false"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
