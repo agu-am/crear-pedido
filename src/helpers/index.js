@@ -9,3 +9,11 @@ export const formatearHora = (fechaYHora) => {
     const horaString = fecha.toTimeString().split(' ')[0];
     return horaString
 }
+
+export const formatearMoneda = (valor) => {
+    const n = Number(valor || 0);
+    return "$" + n.toLocaleString("es-AR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+}

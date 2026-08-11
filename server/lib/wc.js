@@ -56,6 +56,15 @@ export async function wcFetchPaginado(path, opts = {}) {
   };
 }
 
+export async function wcFetchConTotal(path, opts = {}) {
+  const { data, res } = await wcFetchRaw(path, opts);
+  return {
+    data,
+    total: Number(res.headers.get("x-wp-total") || 0),
+    totalPages: Number(res.headers.get("x-wp-totalpages") || 0),
+  };
+}
+
 export async function validarCredenciales(username, password) {
   const tokenUrl = process.env.JWT_TOKEN_URL;
   if (!tokenUrl) {

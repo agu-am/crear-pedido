@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { wcFetch, wcFetchPaginado, validarCredenciales } from "./lib/wc.js";
+import { wcFetch, wcFetchPaginado, wcFetchConTotal, validarCredenciales } from "./lib/wc.js";
 import { emitirToken, authRequerido } from "./lib/auth.js";
 
 const app = express();
@@ -108,6 +108,121 @@ function armarProducto(input, esNuevo) {
 
 // Healthcheck (útil para PM2 en Hostinger)
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+function topProductos(ordenes) {
+  const mapa = {};
+  ordenes.forEach((o) => {
+    (o.line_items || []).forEach((i) => {
+      const nombre = i.name || "Producto";
+      mapa[nombre] = (mapa[nombre] || 0) + (i.quantity || 0);
+    });
+  });
+  return Object.entries(mapa)
+    .map(([name, cantidad]) => ({ name, cantidad }))
+    .sort((a, b) => b.cantidad - a.cantidad)
+    .slice(0, 5);
+}
+
+function inicioDelDia(offsetDias = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() - offsetDias);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+async function resumenOrdenesDesde(desdeISO) {
+  let page = 1;
+  let count = 0;
+  let suma = 0;
+  for (;;) {
+    const r = await wcFetchConTotal("orders", {
+      query: {
+        per_page: 100,
+        page,
+        after: desdeISO,
+        orderby: "date",
+        order: "asc",
+        _fields: "id,total",
+      },
+    });
+    (r.data || []).forEach((o) => {
+      count++;
+      suma += Number(o.total || 0);
+    });
+    if (page >= r.totalPages || !r.data || r.data.length === 0) break;
+    page++;
+  }
+  return { count, netSales: suma.toFixed(2) };
+}
+
+// ---- Estadísticas del dashboard (protegido) ----
+app.get("/api/stats", authRequerido, async (req, res, next) => {
+  try {
+    const resultados = await Promise.allSettled([
+      wcFetch("reports/orders/totals"),
+      wcFetch("reports/customers/totals"),
+      wcFetchConTotal("products", { query: { per_page: 1 } }),
+      wcFetchConTotal("products", { query: { status: "publish", per_page: 1 } }),
+      wcFetchConTotal("products", { query: { status: "draft", per_page: 1 } }),
+      wcFetchConTotal("products", { query: { status: "pending", per_page: 1 } }),
+      wcFetchConTotal("products", {
+        query: { stock_status: "outofstock", per_page: 1 },
+      }),
+      wcFetchConTotal("products/categories", { query: { per_page: 1 } }),
+      wcFetchConTotal("orders", {
+        query: {
+          per_page: 100,
+          page: 1,
+          orderby: "date",
+          order: "desc",
+          _fields: "id,line_items",
+        },
+      }),
+      resumenOrdenesDesde(inicioDelDia(0)),
+      resumenOrdenesDesde(inicioDelDia(7)),
+    ]);
+
+    const val = (r) => (r.status === "fulfilled" ? r.value : null);
+
+    const estados = val(resultados[0]) || [];
+    const totalOrdenes = estados.reduce((acc, e) => acc + (e.total || 0), 0);
+    const enProceso = estados
+      .filter((e) => ["pending", "processing", "on-hold"].includes(e.slug))
+      .reduce((acc, e) => acc + (e.total || 0), 0);
+
+    const clientes = val(resultados[1]) || [];
+    const totalClientes = clientes.reduce((acc, e) => acc + (e.total || 0), 0);
+
+    const hoy = val(resultados[9]) || { count: 0, netSales: "0" };
+    const ultimos7 = val(resultados[10]) || { count: 0, netSales: "0" };
+    const promedio =
+      ultimos7.count > 0
+        ? (Number(ultimos7.netSales) / ultimos7.count).toFixed(2)
+        : "0";
+
+    res.json({
+      ordenes: {
+        total: totalOrdenes,
+        enProceso,
+        hoy,
+        ultimos7: { ...ultimos7, promedio },
+      },
+      productos: {
+        total: val(resultados[2])?.total || 0,
+        publicados: val(resultados[3])?.total || 0,
+        borradores: (val(resultados[4])?.total || 0) + (val(resultados[5])?.total || 0),
+        agotados: val(resultados[6])?.total || 0,
+        categorias: val(resultados[7])?.total || 0,
+      },
+      clientes: {
+        total: totalClientes,
+      },
+      masVendidos: topProductos(val(resultados[8])?.data || []),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ---- Auth ----
 app.post("/api/login", async (req, res, next) => {
