@@ -3,8 +3,7 @@ import Error from "./Error";
 import { BsWhatsapp } from "react-icons/bs";
 import { FaTrashAlt, FaMinus, FaPlus } from "react-icons/fa";
 import { RiCloseCircleLine } from "react-icons/ri";
-import "react-toastify/dist/ReactToastify.css";
-import { toast } from "react-toastify";
+import { notificarExito, notificarError } from "../helpers/toast";
 
 const ModalPedido = () => {
   const {
@@ -30,17 +29,7 @@ const ModalPedido = () => {
           : producto
       ),
     }));
-    toast.success("Producto actualizado correctamente!", {
-      position: "top-center",
-      autoClose: 500,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      toastId: "actualizar",
-    });
+    notificarExito("Producto actualizado correctamente!", { autoClose: 500, toastId: "actualizar" });
   };
 
   const handleBorrarProducto = (producto) => {
@@ -48,17 +37,7 @@ const ModalPedido = () => {
       ...prevPedido,
       productos: prevPedido.productos.filter((p) => p.sku !== producto.sku),
     }));
-    toast.error("Producto eliminado correctamente!", {
-      position: "top-center",
-      autoClose: 500,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      toastId: "actualizar",
-    });
+    notificarError("Producto eliminado correctamente!", { autoClose: 500, toastId: "actualizar" });
   };
 
   return (

@@ -1,6 +1,9 @@
 import { useState, useEffect, createContext, useCallback } from "react";
 import api from "../helpers/api";
-import { toast } from "react-toastify";
+import { notificarExito, notificarError } from "../helpers/toast";
+import { ordenesEjemplo } from "../helpers/ordenesEjemplo";
+
+const usarPedidosEjemplo = import.meta.env.VITE_MOCK_ORDENES === "true";
 
 const PedidosContext = createContext();
 
@@ -97,6 +100,11 @@ const PedidosProvider = ({ children }) => {
   }, [busquedaCliente, obtenerClientes]);
 
   const obtenerOrdenes = useCallback(async () => {
+    if (usarPedidosEjemplo) {
+      setOrdenes(ordenesEjemplo);
+      setErrorOrdenes(false);
+      return;
+    }
     try {
       setErrorOrdenes(false);
       const { data } = await api.get("/ordenes");
@@ -138,18 +146,7 @@ const PedidosProvider = ({ children }) => {
         ],
       };
     });
-    toast.success(mensaje, {
-      position: "top-center",
-      limit: 1,
-      autoClose: 300,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      toastId: "actualizar",
-    });
+    notificarExito(mensaje, { autoClose: 300, toastId: "actualizar" });
   };
 
   const handleAgregarAlCarrito = (producto, mensaje) => {
@@ -174,17 +171,7 @@ const PedidosProvider = ({ children }) => {
       };
     });
     setBusqueda("");
-    toast.success(mensaje, {
-      position: "top-center",
-      limit: 1,
-      autoClose: 300,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+    notificarExito(mensaje, { autoClose: 300 });
   };
 
   const handleDisminuirProducto = (producto, mensaje) => {
@@ -196,18 +183,7 @@ const PedidosProvider = ({ children }) => {
         )
         .filter((p) => p.quantity > 0),
     }));
-    toast.success(mensaje, {
-      position: "top-center",
-      limit: 1,
-      autoClose: 300,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      toastId: "actualizar",
-    });
+    notificarExito(mensaje, { autoClose: 300, toastId: "actualizar" });
   };
 
   const crearOrden = async () => {
@@ -248,7 +224,7 @@ const PedidosProvider = ({ children }) => {
       return;
     }
     if (pedido.productos.length === 0) {
-      toast.error("No hay productos en el pedido");
+      notificarError("No hay productos en el pedido");
       return;
     }
     setValidarCliente(false);
@@ -256,7 +232,7 @@ const PedidosProvider = ({ children }) => {
     try {
       await crearOrden();
     } catch (error) {
-      toast.error("No se pudo crear la orden. Revisá la conexión.");
+      notificarError("No se pudo crear la orden. Revisá la conexión.");
       return;
     }
 
@@ -273,17 +249,7 @@ const PedidosProvider = ({ children }) => {
     setBusqueda("");
     setClienteInputSearch("");
 
-    toast.success("Pedido realizado!", {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      limit: 1,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+    notificarExito("Pedido realizado!", { autoClose: 5000 });
   };
 
   useEffect(() => {

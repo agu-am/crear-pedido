@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api, { setToken } from '../helpers/api';
-import { toast } from 'react-toastify';
+import { notificarError } from '../helpers/toast';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -17,16 +17,7 @@ function Login() {
       setToken(data.token);
       navigate('/admin');
     } catch (error) {
-      toast.error('Usuario o contraseña incorrectos', {
-        position: 'top-center',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'colored',
-      });
+      notificarError('Usuario o contraseña incorrectos');
     } finally {
       setCargando(false);
     }

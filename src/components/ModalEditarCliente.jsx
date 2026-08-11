@@ -2,8 +2,7 @@ import { useState } from "react";
 import usePedido from "../hooks/usePedido";
 import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
-import "react-toastify/dist/ReactToastify.css";
-import { toast } from "react-toastify";
+import { notificarExito, notificarError } from "../helpers/toast";
 import AsyncSelect from "react-select/async";
 import { vendedores } from "../helpers/vendedores";
 
@@ -32,27 +31,9 @@ const ModalEditarCliente = ({ modalEditarCliente, setModalEditarCliente }) => {
         try {
             await Promise.all(promesas);
             setModalEditarCliente(false);
-            toast.success('Número de teléfono actualizado con éxito', {
-                position: 'top-center',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'colored',
-            });
+            notificarExito('Número de teléfono actualizado con éxito');
         } catch (error) {
-            toast.error('Hubo un error al hacer las solicitudes', {
-                position: 'top-center',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'colored',
-            });
+            notificarError('Hubo un error al hacer las solicitudes');
         }
     };
 

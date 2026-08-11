@@ -61,6 +61,8 @@ VITE_API_URL=https://TU-PROXY.dominio.com
 
 > `VITE_API_URL` se define **en el build** y es solo el origen (el código agrega `/api` automáticamente, p. ej. `https://TU-PROXY.dominio.com/api`). No incluir credenciales con prefijo `VITE_` (quedarían visibles en el bundle).
 
+Opcional en desarrollo: `VITE_MOCK_ORDENES=true` muestra **órdenes de ejemplo** en `/ordenes` (útil para diseñar sin datos). Para producción, **no definirla** (o `false`) para traer las órdenes reales.
+
 ### 3. Login
 
 El proxy valida usuario/contraseña contra el endpoint `jwt-auth` del sitio y emite su **propio token** (firmado con `JWT_SECRET`, expira en 8h). El frontend lo guarda en `localStorage` y lo envía como `Authorization: Bearer`.

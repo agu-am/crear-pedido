@@ -13,7 +13,12 @@ import { ToastContainer } from "react-toastify";
 function App() {
   return (
     <PedidosProvider>
-      <ToastContainer position="top-center" limit={1} />
+      <ToastContainer
+        position="top-center"
+        limit={2}
+        closeButton={false}
+        toastOptions={{ autoClose: 2200, pauseOnFocusLoss: false }}
+      />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

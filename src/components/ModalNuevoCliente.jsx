@@ -1,8 +1,7 @@
 import { useState } from "react";
 import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
-import "react-toastify/dist/ReactToastify.css";
-import { toast } from "react-toastify";
+import { notificarExito, notificarError } from "../helpers/toast";
 
 const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
     const [username, setUsername] = useState('');
@@ -18,27 +17,9 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
             setModalNuevoCliente(false);
             setUsername('');
             setEmail('');
-            toast.success('Cliente agregado exitosamente', {
-                position: 'top-center',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'colored',
-            });
+            notificarExito('Cliente agregado exitosamente');
         } catch (error) {
-            toast.error(error?.response?.data?.message || 'Error al agregar cliente', {
-                position: 'top-center',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'colored',
-            });
+            notificarError(error?.response?.data?.message || 'Error al agregar cliente');
         } finally {
             setCargando(false);
         }

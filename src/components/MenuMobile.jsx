@@ -1,23 +1,41 @@
 import usePedido from '../hooks/usePedido'
 import { RxCross2 } from 'react-icons/rx'
-import { Link } from 'react-router-dom'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { FaSignOutAlt } from 'react-icons/fa'
+import { clearToken } from '../helpers/api'
 
 const MenuMobile = () => {
     const { setToggleMenu } = usePedido()
+    const navigate = useNavigate()
+
+    const cerrar = () => setToggleMenu(false)
+
+    const handleLogout = () => {
+        clearToken()
+        setToggleMenu(false)
+        navigate('/login')
+    }
+
     const links = [
-        { to: '/', label: 'Inicio' },
-        { to: '/ordenes', label: 'Órdenes' },
-        { to: '/clientes', label: 'Clientes' },
+        { to: '/', label: 'Inicio', end: true },
+        { to: '/ordenes', label: 'Órdenes', end: false },
+        { to: '/clientes', label: 'Clientes', end: false },
     ]
+
+    const linkClass = ({ isActive }) =>
+        isActive
+            ? 'block rounded-2xl bg-positive-pale px-4 py-3.5 text-sm font-semibold text-positive-deep'
+            : 'block rounded-2xl px-4 py-3.5 text-sm font-semibold text-ink'
+
     return (
         <div className="lg:hidden">
             <div
                 className="fixed inset-0 z-40 bg-ink/50"
-                onClick={() => setToggleMenu(false)}
+                onClick={cerrar}
             ></div>
             <div className="fixed left-0 top-0 z-50 flex h-full w-8/12 max-w-xs flex-col rounded-r-3xl bg-canvas shadow-sheet">
                 <div className="flex items-center justify-between p-5">
-                    <Link to="/" onClick={() => setToggleMenu(false)}>
+                    <Link to="/" onClick={cerrar}>
                         <img
                             className="h-10 w-10 rounded-2xl object-cover"
                             src="https://pedidospaul.agudev.com.ar/wp-content/uploads/2023/11/logoPedidosPaul.png"
@@ -25,26 +43,30 @@ const MenuMobile = () => {
                         />
                     </Link>
                     <button
-                        onClick={() => setToggleMenu(false)}
+                        onClick={cerrar}
                         className="text-mute transition hover:text-ink"
                         aria-label="Cerrar menú"
                     >
                         <RxCross2 size="1.5rem" />
                     </button>
                 </div>
-                <ul className="divide-y divide-canvas-soft px-3">
+                <ul className="flex flex-1 flex-col gap-1 overflow-y-auto px-3">
                     {links.map((l) => (
                         <li key={l.to}>
-                            <Link
-                                onClick={() => setToggleMenu(false)}
-                                to={l.to}
-                                className="block px-3 py-4 text-sm font-semibold text-ink"
-                            >
+                            <NavLink to={l.to} end={l.end} onClick={cerrar} className={linkClass}>
                                 {l.label}
-                            </Link>
+                            </NavLink>
                         </li>
                     ))}
                 </ul>
+                <div className="border-t border-canvas-soft p-4">
+                    <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center justify-center gap-2 rounded-3xl border border-ink py-3 text-sm font-semibold text-ink transition hover:bg-canvas-soft"
+                    >
+                        <FaSignOutAlt size="0.9rem" /> Salir
+                    </button>
+                </div>
             </div>
         </div>
     )
