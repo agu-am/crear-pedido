@@ -97,7 +97,7 @@ const Admin = () => {
       )}
 
       {cargando && !stats && (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-32 animate-pulse rounded-3xl bg-canvas-soft" />
           ))}
@@ -106,7 +106,7 @@ const Admin = () => {
 
       {stats && (
         <>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Kpi icono={FaTruck} label="Ventas 7 días" valor={formatearMoneda(stats.ordenes.ultimos7.netSales)} acento="bg-positive-pale text-positive-deep" />
             <Kpi icono={FaClipboardList} label="Órdenes 7 días" valor={stats.ordenes.ultimos7.count} acento="bg-canvas-soft text-ink" />
             <Kpi icono={FaCheckCircle} label="Pedido promedio" valor={formatearMoneda(stats.ordenes.ultimos7.promedio)} acento="bg-canvas-soft text-ink" />
