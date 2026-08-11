@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api, { setToken } from '../helpers/api';
 import { notificarError } from '../helpers/toast';
 
@@ -78,6 +78,15 @@ function Login() {
             {cargando ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
+
+        <div className="mt-5 border-t border-canvas-soft pt-5">
+          <Link
+            to="/"
+            className="flex w-full items-center justify-center rounded-3xl border border-ink py-3 text-sm font-semibold text-ink transition hover:bg-canvas-soft"
+          >
+            Volver al inicio
+          </Link>
+        </div>
       </div>
     </div>
   );

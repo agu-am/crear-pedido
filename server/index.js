@@ -313,7 +313,8 @@ app.get("/api/ordenes", authRequerido, async (req, res, next) => {
     const page = Number(req.query.page || 1);
     const data = await wcFetch("orders", {
       query: {
-        _fields: "id,billing,line_items,date_created,customer_note",
+        _fields:
+          "id,billing,line_items,date_created,customer_note,status,total",
         per_page: 50,
         page,
       },
@@ -343,6 +344,36 @@ app.post("/api/ordenes", authRequerido, async (req, res, next) => {
       },
     });
     res.status(201).json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.put("/api/ordenes/:id", authRequerido, async (req, res, next) => {
+  try {
+    const { billing, status, customer_note, line_items } = req.body || {};
+    const body = {};
+    if (billing) body.billing = billing;
+    if (status) body.status = status;
+    if (customer_note !== undefined) body.customer_note = customer_note;
+    if (line_items && Array.isArray(line_items)) body.line_items = line_items;
+    if (Object.keys(body).length === 0) {
+      return res.status(400).json({ message: "No hay datos para actualizar" });
+    }
+    const data = await wcFetch(`orders/${req.params.id}`, {
+      method: "PUT",
+      body,
+    });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete("/api/ordenes/:id", authRequerido, async (req, res, next) => {
+  try {
+    await wcFetch(`orders/${req.params.id}`, { method: "DELETE" });
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

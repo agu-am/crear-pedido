@@ -118,6 +118,35 @@ const PedidosProvider = ({ children }) => {
     obtenerOrdenes();
   }, [obtenerOrdenes]);
 
+  const actualizarOrden = async (id, datos) => {
+    if (usarPedidosEjemplo) {
+      setOrdenes((prev) =>
+        prev.map((o) =>
+          o.id === Number(id)
+            ? {
+                ...o,
+                ...datos,
+                billing: { ...o.billing, ...(datos.billing || {}) },
+                line_items: datos.line_items || o.line_items,
+              }
+            : o
+        )
+      );
+      return;
+    }
+    await api.put(`/ordenes/${id}`, datos);
+    await obtenerOrdenes();
+  };
+
+  const eliminarOrden = async (id) => {
+    if (usarPedidosEjemplo) {
+      setOrdenes((prev) => prev.filter((o) => o.id !== Number(id)));
+      return;
+    }
+    await api.delete(`/ordenes/${id}`);
+    await obtenerOrdenes();
+  };
+
   const handleAumentarProducto = (producto, mensaje) => {
     setPedido((prevPedido) => {
       const productoExistente = prevPedido.productos.find(
@@ -292,6 +321,8 @@ const PedidosProvider = ({ children }) => {
         handleEnviarPedido,
         ordenes,
         crearOrden,
+        actualizarOrden,
+        eliminarOrden,
         toggleMenu,
         setToggleMenu,
         handleAgregarAlCarrito,

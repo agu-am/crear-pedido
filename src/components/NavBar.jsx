@@ -1,18 +1,18 @@
 import usePedido from '../hooks/usePedido'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { GiHamburgerMenu } from 'react-icons/gi'
-import { FaSignOutAlt } from 'react-icons/fa'
+import { FaSignOutAlt, FaHome, FaChartLine, FaBoxOpen, FaClipboardList, FaUsers } from 'react-icons/fa'
 import MenuMobile from './MenuMobile'
 import { clearToken } from '../helpers/api'
 
-const linkBase = 'rounded-full px-4 py-2 text-sm font-semibold transition'
+const linkBase = 'flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition'
 
 const links = [
-  { to: '/', label: 'Inicio', end: true },
-  { to: '/admin', label: 'Dashboard', end: true },
-  { to: '/productos', label: 'Productos', end: false },
-  { to: '/ordenes', label: 'Órdenes', end: false },
-  { to: '/clientes', label: 'Clientes', end: false },
+  { to: '/', label: 'Inicio', end: true, Icon: FaHome },
+  { to: '/admin', label: 'Dashboard', end: true, Icon: FaChartLine },
+  { to: '/productos', label: 'Productos', end: false, Icon: FaBoxOpen },
+  { to: '/ordenes', label: 'Órdenes', end: false, Icon: FaClipboardList },
+  { to: '/clientes', label: 'Clientes', end: false, Icon: FaUsers },
 ]
 
 const NavBar = () => {
@@ -44,6 +44,7 @@ const NavBar = () => {
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación">
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} end={l.end} className={linkClass}>
+              <l.Icon size="0.85rem" />
               {l.label}
             </NavLink>
           ))}

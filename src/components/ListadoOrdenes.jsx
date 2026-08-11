@@ -1,10 +1,27 @@
+import { useState } from "react"
 import usePedido from "../hooks/usePedido"
 import { formatearFecha, formatearHora } from "../helpers"
+import { estadosOrden } from "../helpers/estados"
 import Error from "./Error"
-import { FaClipboardList } from "react-icons/fa"
+import ModalEditarOrden from "./ModalEditarOrden"
+import { FaClipboardList, FaEdit, FaTrashAlt } from "react-icons/fa"
 
 const ListadoOrdenes = () => {
-    const { ordenes, errorOrdenes } = usePedido()
+    const { ordenes, errorOrdenes, eliminarOrden } = usePedido()
+    const [editando, setEditando] = useState(null)
+    const [eliminando, setEliminando] = useState(false)
+
+    const handleEliminar = async (o) => {
+        if (!window.confirm(`¿Eliminar la orden de ${o.billing?.first_name || "cliente"}?`)) return
+        setEliminando(true)
+        try {
+            await eliminarOrden(o.id)
+        } catch (error) {
+            alert(error?.response?.data?.message || "No se pudo eliminar la orden")
+        } finally {
+            setEliminando(false)
+        }
+    }
 
     if (errorOrdenes) {
         return (
@@ -33,6 +50,7 @@ const ListadoOrdenes = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {ordenes.map(o => {
                     const nombreCliente = o.billing?.first_name || ""
+                    const estado = estadosOrden[o.status] || estadosOrden.pending
                     return (
                         <article
                             key={o.id}
@@ -47,9 +65,14 @@ const ListadoOrdenes = () => {
                                 </p>
                             </div>
 
-                            {nombreCliente && (
-                                <h2 className="mb-3 text-base font-bold text-ink">{nombreCliente}</h2>
-                            )}
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                                {nombreCliente ? (
+                                    <h2 className="min-w-0 truncate text-base font-bold text-ink">{nombreCliente}</h2>
+                                ) : <span />}
+                                <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${estado.cls}`}>
+                                    {estado.label}
+                                </span>
+                            </div>
 
                             <ul className="flex-1 divide-y divide-canvas-soft">
                                 {o.line_items.map(i => (
@@ -71,10 +94,28 @@ const ListadoOrdenes = () => {
                                     <p className="mt-1 text-sm text-body">{o.customer_note}</p>
                                 </div>
                             )}
+
+                            <div className="mt-4 flex items-center justify-end gap-2 border-t border-canvas-soft pt-3">
+                                <button
+                                    onClick={() => setEditando(o)}
+                                    className="flex items-center gap-1.5 rounded-full border border-ink px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-canvas-soft"
+                                >
+                                    <FaEdit size="0.7rem" /> Editar
+                                </button>
+                                <button
+                                    onClick={() => handleEliminar(o)}
+                                    disabled={eliminando}
+                                    className="flex items-center gap-1.5 rounded-full bg-negative-bg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                                >
+                                    <FaTrashAlt size="0.7rem" /> Eliminar
+                                </button>
+                            </div>
                         </article>
                     )
                 })}
             </div>
+
+            <ModalEditarOrden orden={editando} setOrden={setEditando} />
         </div>
     )
 }

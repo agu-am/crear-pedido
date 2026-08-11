@@ -32,7 +32,7 @@ const ListadoProductos = () => {
 
             {errorProductos && <Error mensaje={"No se pudieron cargar los productos"} />}
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {cargandoProductos
                     ? Array.from({ length: 12 }).map((_, i) => <CardProductoSkeleton key={i} />)
                     : productos.map(producto => (

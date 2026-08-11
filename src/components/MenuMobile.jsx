@@ -1,7 +1,7 @@
 import usePedido from '../hooks/usePedido'
 import { RxCross2 } from 'react-icons/rx'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
-import { FaSignOutAlt } from 'react-icons/fa'
+import { FaSignOutAlt, FaHome, FaChartLine, FaBoxOpen, FaClipboardList, FaUsers } from 'react-icons/fa'
 import { clearToken } from '../helpers/api'
 
 const MenuMobile = () => {
@@ -17,17 +17,17 @@ const MenuMobile = () => {
     }
 
     const links = [
-        { to: '/', label: 'Inicio', end: true },
-        { to: '/admin', label: 'Dashboard', end: true },
-        { to: '/productos', label: 'Productos', end: false },
-        { to: '/ordenes', label: 'Órdenes', end: false },
-        { to: '/clientes', label: 'Clientes', end: false },
+        { to: '/', label: 'Inicio', end: true, Icon: FaHome },
+        { to: '/admin', label: 'Dashboard', end: true, Icon: FaChartLine },
+        { to: '/productos', label: 'Productos', end: false, Icon: FaBoxOpen },
+        { to: '/ordenes', label: 'Órdenes', end: false, Icon: FaClipboardList },
+        { to: '/clientes', label: 'Clientes', end: false, Icon: FaUsers },
     ]
 
     const linkClass = ({ isActive }) =>
         isActive
-            ? 'block rounded-2xl bg-positive-pale px-4 py-3.5 text-sm font-semibold text-positive-deep'
-            : 'block rounded-2xl px-4 py-3.5 text-sm font-semibold text-ink'
+            ? 'flex items-center gap-2 rounded-2xl bg-positive-pale px-4 py-3.5 text-sm font-semibold text-positive-deep'
+            : 'flex items-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-semibold text-ink'
 
     return (
         <div className="lg:hidden">
@@ -56,6 +56,7 @@ const MenuMobile = () => {
                     {links.map((l) => (
                         <li key={l.to}>
                             <NavLink to={l.to} end={l.end} onClick={cerrar} className={linkClass}>
+                                <l.Icon size="1rem" />
                                 {l.label}
                             </NavLink>
                         </li>

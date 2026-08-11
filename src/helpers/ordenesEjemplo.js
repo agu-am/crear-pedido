@@ -3,6 +3,8 @@ export const ordenesEjemplo = [
     id: 99001,
     date_created: "2026-08-10T09:15:00",
     billing: { first_name: "DARDI NORMA" },
+    status: "processing",
+    total: "48213.40",
     line_items: [
       { id: 1, name: "Pan Hamburguesa gastro.papa c/sesam1p 20u fargo", quantity: 2 },
       { id: 2, name: "Yogur Ser BOT Multifruta x 190gr.", quantity: 6 },
@@ -14,6 +16,8 @@ export const ordenesEjemplo = [
     id: 99002,
     date_created: "2026-08-10T14:40:00",
     billing: { first_name: "ABS CAFETERIAS Y SERVICIOS" },
+    status: "completed",
+    total: "84998.69",
     line_items: [
       { id: 1, name: "Mc Cain Boniato x 2,5 Kg. (6)", quantity: 3 },
       { id: 2, name: "Donut Celeste c/DL Granas x 12 u. (4)", quantity: 2 },
@@ -24,6 +28,8 @@ export const ordenesEjemplo = [
     id: 99003,
     date_created: "2026-08-09T11:05:00",
     billing: { first_name: "WEMBLEY S.A." },
+    status: "processing",
+    total: "32014.23",
     line_items: [
       { id: 1, name: "Lavavajilla Cif Bioactive Lima Bot x 500ml. (12)", quantity: 1 },
       { id: 2, name: "Queso Hebras 4 Quesos Mini x 80 gr.", quantity: 10 },
@@ -34,6 +40,8 @@ export const ordenesEjemplo = [
     id: 99004,
     date_created: "2026-08-09T16:20:00",
     billing: { first_name: "Panificados La Estancia" },
+    status: "pending",
+    total: "27115.84",
     line_items: [
       { id: 1, name: "Pan Pancho 210g BOH", quantity: 5 },
       { id: 2, name: "Pan Salvado 330g BOH", quantity: 3 },
@@ -45,6 +53,8 @@ export const ordenesEjemplo = [
     id: 99005,
     date_created: "2026-08-08T10:50:00",
     billing: { first_name: "Minimercado Central" },
+    status: "on-hold",
+    total: "19376.08",
     line_items: [
       { id: 1, name: "Mani King Cheff Asado x 80 gr. (15)", quantity: 8 },
       { id: 2, name: "Yogur SER Natural x 300gr.", quantity: 12 },
@@ -56,6 +66,8 @@ export const ordenesEjemplo = [
     id: 99006,
     date_created: "2026-08-08T17:30:00",
     billing: { first_name: "Heladeria Los Andes" },
+    status: "completed",
+    total: "74821.35",
     line_items: [
       { id: 1, name: "Pan de Hamb de Papa c/ Sesamo x 4u - KANSAS", quantity: 6 },
       { id: 2, name: "Mayonesa Ind. Hellmanns Asado 196x7.6cc.", quantity: 3 },
