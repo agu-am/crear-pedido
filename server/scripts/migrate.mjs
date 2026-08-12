@@ -1,9 +1,14 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { initDb, query } from "../db.js";
+import { supabase } from "../supabase.js";
 import { wcFetchPaginado } from "../lib/wc.js";
 import { vendedores } from "../vendedores.js";
+
+if (!supabase) {
+  console.error("Supabase no configurado. Revisar SUPABASE_URL y SUPABASE_API_KEY en el entorno.");
+  process.exit(1);
+}
 
 const CAMPOS_PRODUCTO =
   "id,name,sku,regular_price,sale_price,price,stock_quantity,stock_status,status,type,description,images,categories";
@@ -26,121 +31,147 @@ function numero(v) {
   return v === null || v === undefined || v === "" ? null : Number(v);
 }
 
-const upsertCategoria = async (c) => {
-  await query(
-    `INSERT INTO categorias (woocommerce_id, name, slug)
-     VALUES (?, ?, ?)
-     ON DUPLICATE KEY UPDATE name = VALUES(name), slug = VALUES(slug)`,
-    [c.id, c.name, c.slug || ""]
-  );
-};
+function lotes(arr, n) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
+  return out;
+}
 
-const upsertProducto = async (p) => {
-  const imageUrl = p.images?.[0]?.src || "";
-  await query(
-    `INSERT INTO productos
-       (woocommerce_id, sku, name, image_url, unidad_medida, regular_price, sale_price, price, stock_quantity, stock_status, status, type, description)
-     VALUES (?, ?, ?, ?, 'unidad', ?, ?, ?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-       sku = VALUES(sku), name = VALUES(name), image_url = VALUES(image_url),
-       regular_price = VALUES(regular_price), sale_price = VALUES(sale_price), price = VALUES(price),
-       stock_quantity = VALUES(stock_quantity), stock_status = VALUES(stock_status),
-       status = VALUES(status), type = VALUES(type), description = VALUES(description)`,
-    [
-      p.id,
-      p.sku || "",
-      p.name,
-      imageUrl,
-      numero(p.regular_price),
-      numero(p.sale_price),
-      numero(p.price),
-      numero(p.stock_quantity),
-      p.stock_status || "",
-      p.status || "publish",
-      p.type || "simple",
-      p.description || "",
-    ]
-  );
-
-  if (p.categories?.length) {
-    const filas = await query("SELECT id, woocommerce_id FROM categorias");
-    const map = new Map(filas.map((f) => [f.woocommerce_id, f.id]));
-    const prod = await query("SELECT id FROM productos WHERE woocommerce_id = ?", [p.id]);
-    if (prod.length) {
-      await query("DELETE FROM producto_categorias WHERE producto_id = ?", [prod[0].id]);
-      for (const c of p.categories) {
-        const catId = map.get(c.id);
-        if (catId) {
-          await query(
-            "INSERT IGNORE INTO producto_categorias (producto_id, categoria_id) VALUES (?, ?)",
-            [prod[0].id, catId]
-          );
-        }
-      }
-    }
+async function migrarCategorias() {
+  const cats = await traerTodo("products/categories", { _fields: "id,name,slug" });
+  const rows = cats.map((c) => ({ woocommerce_id: c.id, name: c.name, slug: c.slug || "" }));
+  for (const lote of lotes(rows, 100)) {
+    const { error } = await supabase.from("categorias").upsert(lote, { onConflict: "woocommerce_id" });
+    if (error) throw error;
   }
-};
+  console.log(`Categorías migradas: ${cats.length}`);
+  return cats.length;
+}
 
-const upsertCliente = async (c) => {
-  await query(
-    `INSERT INTO clientes (woocommerce_id, username, first_name, last_name, email, phone)
-     VALUES (?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-       username = VALUES(username), first_name = VALUES(first_name),
-       last_name = VALUES(last_name), email = VALUES(email), phone = VALUES(phone)`,
-    [
-      c.id,
-      c.username || "",
-      c.billing?.first_name || "",
-      c.billing?.last_name || "",
-      c.email || "",
-      c.billing?.phone || "",
-    ]
-  );
-};
-
-const upsertOrden = async (o, clientesMap, productosMap) => {
-  const clienteId = o.customer_id ? clientesMap.get(o.customer_id) || null : null;
-  await query(
-    `INSERT INTO ordenes (woocommerce_id, cliente_id, cliente_nombre, telefono, status, total, customer_note, fecha)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-       cliente_id = VALUES(cliente_id), cliente_nombre = VALUES(cliente_nombre),
-       telefono = VALUES(telefono), status = VALUES(status), total = VALUES(total),
-       customer_note = VALUES(customer_note), fecha = VALUES(fecha)`,
-    [
-      o.id,
-      clienteId,
-      o.billing?.first_name || "",
-      o.billing?.phone || "",
-      o.status || "processing",
-      numero(o.total) || 0,
-      o.customer_note || "",
-      o.date_created ? new Date(o.date_created) : null,
-    ]
-  );
-
-  const fila = await query("SELECT id FROM ordenes WHERE woocommerce_id = ?", [o.id]);
-  if (!fila.length) return;
-  const ordenId = fila[0].id;
-
-  await query("DELETE FROM orden_items WHERE orden_id = ?", [ordenId]);
-  for (const i of o.line_items || []) {
-    await query(
-      `INSERT INTO orden_items (orden_id, producto_id, name, sku, price, quantity, total)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        ordenId,
-        i.product_id ? productosMap.get(i.product_id) || null : null,
-        i.name || "",
-        i.sku || "",
-        numero(i.price) || 0,
-        i.quantity || 0,
-        numero(i.total) || 0,
-      ]
-    );
+async function migrarProductos() {
+  const prods = await traerTodo("products", { _fields: CAMPOS_PRODUCTO });
+  const rows = prods.map((p) => ({
+    woocommerce_id: p.id,
+    sku: p.sku || "",
+    name: p.name,
+    image_url: p.images?.[0]?.src || "",
+    unidad_medida: "unidad",
+    regular_price: numero(p.regular_price),
+    sale_price: numero(p.sale_price),
+    price: numero(p.price),
+    stock_quantity: numero(p.stock_quantity),
+    stock_status: p.stock_status || "",
+    status: p.status || "publish",
+    type: p.type || "simple",
+    description: p.description || "",
+  }));
+  for (const lote of lotes(rows, 100)) {
+    const { error } = await supabase.from("productos").upsert(lote, { onConflict: "woocommerce_id" });
+    if (error) throw error;
   }
-};
+
+  const { data: cats } = await supabase.from("categorias").select("id,woocommerce_id");
+  const catMap = new Map((cats || []).map((c) => [c.woocommerce_id, c.id]));
+  const { data: prodsDb } = await supabase.from("productos").select("id,woocommerce_id");
+  const prodMap = new Map((prodsDb || []).map((p) => [p.woocommerce_id, p.id]));
+
+  const pcRows = [];
+  prods.forEach((p) => {
+    const pid = prodMap.get(p.id);
+    if (!pid) return;
+    (p.categories || []).forEach((c) => {
+      const cid = catMap.get(c.id);
+      if (cid) pcRows.push({ producto_id: pid, categoria_id: cid });
+    });
+  });
+  for (const lote of lotes(pcRows, 500)) {
+    const { error } = await supabase.from("producto_categorias").upsert(lote, {
+      onConflict: "producto_id,categoria_id",
+      ignoreDuplicates: true,
+    });
+    if (error) throw error;
+  }
+  console.log(`Productos migrados: ${prods.length} (relaciones categoria: ${pcRows.length})`);
+  return prods.length;
+}
+
+async function migrarClientes() {
+  const clientes = await traerTodo("customers", { _fields: "id,username,email,billing" });
+  const rows = clientes.map((c) => ({
+    woocommerce_id: c.id,
+    username: c.username || "",
+    first_name: c.billing?.first_name || "",
+    last_name: c.billing?.last_name || "",
+    email: c.email || "",
+    phone: c.billing?.phone || "",
+  }));
+  for (const lote of lotes(rows, 100)) {
+    const { error } = await supabase.from("clientes").upsert(lote, { onConflict: "woocommerce_id" });
+    if (error) throw error;
+  }
+  console.log(`Clientes migrados: ${clientes.length}`);
+  return clientes.length;
+}
+
+async function migrarOrdenes() {
+  const ordenes = await traerTodo("orders", {
+    _fields: "id,billing,line_items,date_created,customer_note,status,total,customer_id",
+  });
+
+  const { data: cliDb } = await supabase.from("clientes").select("id,woocommerce_id");
+  const cliMap = new Map((cliDb || []).map((c) => [c.woocommerce_id, c.id]));
+  const { data: prodDb } = await supabase.from("productos").select("id,woocommerce_id");
+  const prodMap = new Map((prodDb || []).map((p) => [p.woocommerce_id, p.id]));
+
+  const rows = ordenes.map((o) => ({
+    woocommerce_id: o.id,
+    cliente_id: o.customer_id ? cliMap.get(o.customer_id) || null : null,
+    cliente_nombre: o.billing?.first_name || "",
+    telefono: o.billing?.phone || "",
+    status: o.status || "processing",
+    total: numero(o.total) || 0,
+    customer_note: o.customer_note || "",
+    fecha: o.date_created ? new Date(o.date_created).toISOString() : null,
+  }));
+
+  const ids = [];
+  for (const lote of lotes(rows, 100)) {
+    const { data: insertados, error } = await supabase
+      .from("ordenes")
+      .upsert(lote, { onConflict: "woocommerce_id" })
+      .select("id,woocommerce_id");
+    if (error) throw error;
+    ids.push(...(insertados || []));
+  }
+  const ordMap = new Map(ids.map((o) => [o.woocommerce_id, o.id]));
+
+  // Reconstruir los items de todas las ordenes
+  const { error: delItems } = await supabase.from("orden_items").delete().neq("id", 0);
+  if (delItems) throw delItems;
+
+  const itemsRows = [];
+  ordenes.forEach((o) => {
+    const oid = ordMap.get(o.id);
+    if (!oid) return;
+    (o.line_items || []).forEach((i) => {
+      itemsRows.push({
+        orden_id: oid,
+        producto_id: i.product_id ? prodMap.get(i.product_id) || null : null,
+        name: i.name || "",
+        sku: i.sku || "",
+        price: numero(i.price) || 0,
+        quantity: i.quantity || 0,
+        total: numero(i.total) || 0,
+      });
+    });
+  });
+  for (const lote of lotes(itemsRows, 500)) {
+    const { error } = await supabase.from("orden_items").insert(lote);
+    if (error) throw error;
+  }
+  console.log(`Órdenes migradas: ${ordenes.length} (items: ${itemsRows.length})`);
+  return ordenes.length;
+}
 
 function generarPassword() {
   return crypto.randomBytes(6).toString("base64url").slice(0, 9);
@@ -150,67 +181,57 @@ async function migrarUsuarios() {
   const adminUser = process.env.ADMIN_USERNAME;
   const adminPass = process.env.ADMIN_PASSWORD;
   if (!adminUser || !adminPass) {
-    throw new Error(
-      "Faltan ADMIN_USERNAME y ADMIN_PASSWORD en el entorno para crear el admin"
-    );
+    throw new Error("Faltan ADMIN_USERNAME y ADMIN_PASSWORD en el entorno para crear el admin");
   }
-  await query(
-    `INSERT INTO usuarios (username, password_hash, nombre, telefono, rol)
-     VALUES (?, ?, ?, '', 'admin')
-     ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), nombre = VALUES(nombre), rol = 'admin'`,
-    [adminUser, bcrypt.hashSync(adminPass, 10), adminUser]
+  const { error: eAdmin } = await supabase.from("usuarios").upsert(
+    [
+      {
+        username: adminUser,
+        password_hash: bcrypt.hashSync(adminPass, 10),
+        nombre: adminUser,
+        telefono: "",
+        rol: "admin",
+      },
+    ],
+    { onConflict: "username" }
   );
+  if (eAdmin) throw eAdmin;
 
   const resultados = [];
   for (const v of vendedores) {
     const pass = generarPassword();
-    await query(
-      `INSERT INTO usuarios (username, password_hash, nombre, telefono, rol)
-       VALUES (?, ?, ?, ?, 'vendedor')
-       ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), telefono = VALUES(telefono)`,
-      [v.nombre.toLowerCase().replace(/\s+/g, ""), bcrypt.hashSync(pass, 10), v.nombre, v.telefono]
+    const usuario = v.nombre.toLowerCase().replace(/\s+/g, "");
+    const { error } = await supabase.from("usuarios").upsert(
+      [
+        {
+          username: usuario,
+          password_hash: bcrypt.hashSync(pass, 10),
+          nombre: v.nombre,
+          telefono: v.telefono,
+          rol: "vendedor",
+        },
+      ],
+      { onConflict: "username" }
     );
-    resultados.push({ vendedor: v.nombre, usuario: v.nombre.toLowerCase().replace(/\s+/g, ""), password: pass });
+    if (error) throw error;
+    resultados.push({ vendedor: v.nombre, usuario, password: pass });
   }
   return resultados;
 }
 
-console.log("Iniciando migración WooCommerce -> MySQL...");
-if (!(await initDb())) {
-  console.error("MySQL no configurado. Revisar DB_* en el entorno.");
-  process.exit(1);
-}
+console.log("Iniciando migración WooCommerce -> Supabase...");
 
-const categorias = await traerTodo("products/categories", { _fields: "id,name,slug" });
-for (const c of categorias) await upsertCategoria(c);
-console.log(`Categorías migradas: ${categorias.length}`);
-
-const productos = await traerTodo("products", { _fields: CAMPOS_PRODUCTO });
-for (const p of productos) await upsertProducto(p);
-console.log(`Productos migrados: ${productos.length}`);
-
-const clientes = await traerTodo("customers", { _fields: "id,username,email,billing" });
-for (const c of clientes) await upsertCliente(c);
-const filasClientes = await query("SELECT id, woocommerce_id FROM clientes");
-const clientesMap = new Map(filasClientes.map((f) => [f.woocommerce_id, f.id]));
-const filasProductos = await query("SELECT id, woocommerce_id FROM productos");
-const productosMap = new Map(filasProductos.map((f) => [f.woocommerce_id, f.id]));
-console.log(`Clientes migrados: ${clientes.length}`);
-
-const ordenes = await traerTodo("orders", {
-  _fields: "id,billing,line_items,date_created,customer_note,status,total,customer_id",
-});
-for (const o of ordenes) await upsertOrden(o, clientesMap, productosMap);
-console.log(`Órdenes migradas: ${ordenes.length}`);
-
+const nCat = await migrarCategorias();
+const nProd = await migrarProductos();
+const nCli = await migrarClientes();
+const nOrd = await migrarOrdenes();
 const passwords = await migrarUsuarios();
-console.log("Usuarios migrados (admin + vendedores).");
 
 console.log("\n========== RESUMEN ==========");
-console.log(`Categorías: ${categorias.length}`);
-console.log(`Productos:  ${productos.length}`);
-console.log(`Clientes:   ${clientes.length}`);
-console.log(`Órdenes:    ${ordenes.length}`);
+console.log(`Categorías: ${nCat}`);
+console.log(`Productos:  ${nProd}`);
+console.log(`Clientes:   ${nCli}`);
+console.log(`Órdenes:    ${nOrd}`);
 console.log("\n========== VENDEDORES (contraseñas iniciales) ==========");
 for (const r of passwords) {
   console.log(`- ${r.vendedor}: usuario "${r.usuario}" | contraseña: ${r.password}`);
