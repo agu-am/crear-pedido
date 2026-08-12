@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import usePedido from "../hooks/usePedido"
 import { formatearFecha, formatearHora } from "../helpers"
 import { estadosOrden } from "../helpers/estados"
@@ -6,10 +6,20 @@ import Error from "./Error"
 import ModalEditarOrden from "./ModalEditarOrden"
 import { FaClipboardList, FaEdit, FaTrashAlt } from "react-icons/fa"
 
+const INTERVALO_REFRESCO = 30000
+
 const ListadoOrdenes = () => {
-    const { ordenes, errorOrdenes, eliminarOrden } = usePedido()
+    const { ordenes, errorOrdenes, cargandoOrdenes, eliminarOrden, obtenerOrdenes } = usePedido()
     const [editando, setEditando] = useState(null)
     const [eliminando, setEliminando] = useState(false)
+
+    useEffect(() => {
+        obtenerOrdenes()
+        const id = setInterval(() => {
+            obtenerOrdenes()
+        }, INTERVALO_REFRESCO)
+        return () => clearInterval(id)
+    }, [obtenerOrdenes])
 
     const handleEliminar = async (o) => {
         if (!window.confirm(`¿Eliminar la orden de ${o.billing?.first_name || "cliente"}?`)) return
@@ -27,6 +37,19 @@ const ListadoOrdenes = () => {
         return (
             <div className="mx-auto max-w-6xl px-4 py-8">
                 <Error mensaje={"No se pudieron cargar las órdenes"} />
+            </div>
+        )
+    }
+
+    if (cargandoOrdenes && ordenes.length === 0) {
+        return (
+            <div className="mx-auto max-w-6xl px-4 py-8">
+                <h1 className="mb-6 text-display-xs text-ink">Órdenes</h1>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-48 animate-pulse rounded-3xl bg-canvas-soft" />
+                    ))}
+                </div>
             </div>
         )
     }

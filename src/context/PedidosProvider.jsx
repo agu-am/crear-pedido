@@ -32,6 +32,7 @@ const PedidosProvider = ({ children }) => {
   const [clienteInputSearch, setClienteInputSearch] = useState("");
   const [ordenes, setOrdenes] = useState([]);
   const [errorOrdenes, setErrorOrdenes] = useState(false);
+  const [cargandoOrdenes, setCargandoOrdenes] = useState(true);
   const [toggleMenu, setToggleMenu] = useState(false);
   const [paginaProductos, setPaginaProductos] = useState(1);
   const [hayMasProductos, setHayMasProductos] = useState(false);
@@ -121,20 +122,20 @@ const PedidosProvider = ({ children }) => {
     if (usarPedidosEjemplo) {
       setOrdenes(ordenesEjemplo);
       setErrorOrdenes(false);
+      setCargandoOrdenes(false);
       return;
     }
+    setCargandoOrdenes(true);
     try {
       setErrorOrdenes(false);
       const { data } = await api.get("/ordenes");
       setOrdenes(data);
     } catch (error) {
       setErrorOrdenes(true);
+    } finally {
+      setCargandoOrdenes(false);
     }
   }, []);
-
-  useEffect(() => {
-    obtenerOrdenes();
-  }, [obtenerOrdenes]);
 
   const actualizarOrden = async (id, datos) => {
     if (usarPedidosEjemplo) {
@@ -338,6 +339,8 @@ const PedidosProvider = ({ children }) => {
         setClienteInputSearch,
         handleEnviarPedido,
         ordenes,
+        obtenerOrdenes,
+        cargandoOrdenes,
         crearOrden,
         actualizarOrden,
         eliminarOrden,
