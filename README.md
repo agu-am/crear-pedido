@@ -141,6 +141,21 @@ Cuando verifiques la migración, cambiar `DATA_SOURCE=supabase`, reiniciar el pr
 
 > La migración es re-ejecutable: correla de nuevo antes del corte para capturar cambios recientes.
 
+## Deploy todo-en-uno en Hostinger (Node)
+
+Frontend + API en el **mismo dominio** (Hostinger Node hosting). Express sirve el `dist/` del frontend y los `/api/*`. No hace falta Netlify.
+
+1. En hPanel, app **Node.js**:
+   - **Application root**: la raíz del repo (donde está el `package.json` del frontend).
+   - **Build command**: `npm run build` (genera `dist/`).
+   - **Startup file**: `server/index.js`.
+   - **Node version**: 22 si está disponible.
+2. Variables de entorno (hPanel): `SUPABASE_URL`, `SUPABASE_API_KEY`, `JWT_SECRET`, `DATA_SOURCE=supabase`, `WC_URL`, `WC_CONSUMER_KEY`, `WC_CONSUMER_SECRET`, `CACHE_TTL`. **No** definir `VITE_API_URL` (`.env.production` lo deja relativo a `/api`).
+3. Subir el repo completo y desplegar.
+4. Verificar: `https://TU-SUBDOMINIO/` (frontend) y `https://TU-SUBDOMINIO/api/health`.
+
+> En modo local con `npm run dev`, el front usa `.env` (apunta a `http://localhost:3100`). En build de producción usa `.env.production` (`VITE_API_URL=` → `/api` relativo).
+
 ## Desarrollo
 
 ```bash
