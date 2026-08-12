@@ -151,6 +151,11 @@ Frontend + API (proxy) en **Netlify**; datos en **Supabase** (Hostinger). Es la 
 
 > **Hostinger Node no es necesario** para este stack: Netlify (gratis) cubre frontend + API, y Supabase + WooCommerce quedan en Hostinger. El plan Node puede cancelarse.
 
+### Sincronización con WooCommerce (transición)
+- **Botón "Sincronizar"** en el panel: trae las **órdenes de los últimos 30 días** de WooCommerce a Supabase (`POST /api/admin/sync`). El full se hace con `npm run migrate`.
+- **Doble escritura de órdenes**: al crear una orden, se guarda en Supabase **y** se empuja a WooCommerce (best-effort), para que la tienda pública quede al día hasta que la app sea oficial.
+- **Al retirar WooCommerce**: quitar el push de órdenes en `server/supabase.js` y el botón Sincronizar en `Admin.jsx`.
+
 ## Desarrollo
 
 ```bash
