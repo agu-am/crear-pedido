@@ -1,9 +1,15 @@
 import "dotenv/config";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import express from "express";
 import cors from "cors";
 import { wcFetch, wcFetchPaginado, wcFetchConTotal, validarCredenciales } from "./lib/wc.js";
 import { emitirToken, authRequerido } from "./lib/auth.js";
 import { routerSupabase } from "./supabase.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distDir = path.resolve(__dirname, "../dist");
 
 const app = express();
 
@@ -584,6 +590,12 @@ app.put("/api/productos/:id", authRequerido, async (req, res, next) => {
     next(err);
   }
 });
+
+// Sirve el frontend compilado (dist/) en el mismo dominio (deploy todo-en-uno)
+if (fs.existsSync(distDir)) {
+  app.use(express.static(distDir));
+  app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(distDir, "index.html")));
+}
 
 app.use((_req, res) => res.status(404).json({ message: "No encontrado" }));
 
