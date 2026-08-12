@@ -49,14 +49,14 @@ const Producto = ({ producto }) => {
       <h3 className="line-clamp-2 text-sm font-bold leading-tight text-ink">{name}</h3>
       <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-mute">Cod. {sku}</p>
 
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <p className="text-lg font-extrabold text-ink">${price}</p>
+      <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+        <p className="min-w-0 truncate text-lg font-extrabold text-ink">${price}</p>
         {existente ? (
           <div className="flex shrink-0 items-center gap-1">
             <button
               type="button"
               onClick={disminuir}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-ink text-ink transition hover:bg-canvas-soft"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ink text-ink transition hover:bg-canvas-soft"
               aria-label={`Disminuir cantidad de ${name}`}
             >
               <FaMinus size="0.6rem" />
@@ -65,13 +65,13 @@ const Producto = ({ producto }) => {
               type="number"
               value={cantidad}
               onChange={(e) => handleCantidadChange(e.target.value)}
-              className="h-8 w-10 border-0 text-center text-sm font-bold text-ink focus:outline-none"
+              className="h-8 w-10 shrink-0 border-0 text-center text-sm font-bold text-ink focus:outline-none"
               aria-label={`Cantidad de ${name}`}
             />
             <button
               type="button"
               onClick={aumentar}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700"
               aria-label={`Aumentar cantidad de ${name}`}
             >
               <FaPlus size="0.7rem" />
@@ -86,7 +86,7 @@ const Producto = ({ producto }) => {
                 "Producto agregado correctamente!"
               )
             }
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700 active:scale-95"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700 active:scale-95"
             aria-label={`Agregar ${name}`}
           >
             <FiPlus size="1.1rem" />

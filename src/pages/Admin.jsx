@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../helpers/api";
 import { formatearMoneda } from "../helpers";
 import { statsEjemplo } from "../helpers/statsEjemplo";
+import { notificarExito, notificarError } from "../helpers/toast";
 import Error from "../components/Error";
 import { FaInfoCircle } from "react-icons/fa";
 import {
@@ -35,6 +36,7 @@ const Admin = () => {
   const [stats, setStats] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(false)
+  const [sincronizando, setSincronizando] = useState(false)
 
   const cargar = async () => {
     setCargando(true)
@@ -57,6 +59,19 @@ const Admin = () => {
     }
   }
 
+  const sincronizar = async () => {
+    setSincronizando(true)
+    try {
+      const { data } = await api.post("/admin/sync")
+      notificarExito(`Sincronizadas ${data.ordenes} órdenes desde WooCommerce`)
+      await cargar()
+    } catch (e) {
+      notificarError(e?.response?.data?.message || "No se pudo sincronizar")
+    } finally {
+      setSincronizando(false)
+    }
+  }
+
   useEffect(() => {
     cargar()
   }, [])
@@ -72,13 +87,22 @@ const Admin = () => {
             </span>
           )}
         </div>
-        <button
-          onClick={cargar}
-          className="rounded-full border border-ink px-4 py-2 text-sm font-semibold text-ink transition hover:bg-canvas-soft disabled:opacity-50"
-          disabled={cargando}
-        >
-          {cargando ? "Cargando..." : "Actualizar"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={sincronizar}
+            className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50"
+            disabled={sincronizando}
+          >
+            {sincronizando ? "Sincronizando..." : "Sincronizar"}
+          </button>
+          <button
+            onClick={cargar}
+            className="rounded-full border border-ink px-4 py-2 text-sm font-semibold text-ink transition hover:bg-canvas-soft disabled:opacity-50"
+            disabled={cargando}
+          >
+            {cargando ? "Cargando..." : "Actualizar"}
+          </button>
+        </div>
       </div>
 
       {error && (

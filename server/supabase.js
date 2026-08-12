@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { createClient } from "@supabase/supabase-js";
 import { emitirToken, authRequerido } from "./lib/auth.js";
 import { wcFetch } from "./lib/wc.js";
+import { sincronizarOrdenesDesdeWooCommerce } from "./sync.js";
 
 const supabaseDisponible = Boolean(
   process.env.SUPABASE_URL && process.env.SUPABASE_API_KEY
@@ -493,6 +494,39 @@ router.post("/api/ordenes", authRequerido, async (req, res, next) => {
     const { error: errItems } = await supabase.from("orden_items").insert(itemsRows);
     if (errItems) throw errItems;
 
+    // Doble escritura: tambien crear la orden en WooCommerce (tienda publica), best-effort
+    if (process.env.WC_URL) {
+      try {
+        const wcOrden = await wcFetch("orders", {
+          method: "POST",
+          body: {
+            payment_method: "bacs",
+            payment_method_title: "Transferencia bancaria",
+            set_paid: true,
+            billing: {
+              first_name: billing?.first_name || "",
+              phone: billing?.phone || "",
+            },
+            line_items: line_items.map((i) => ({
+              product_id: i.product_id || undefined,
+              name: i.name,
+              quantity: i.quantity,
+              price: i.price,
+            })),
+            customer_note: customer_note || "",
+          },
+        });
+        if (wcOrden && wcOrden.id) {
+          await supabase
+            .from("ordenes")
+            .update({ woocommerce_id: wcOrden.id })
+            .eq("id", orden.id);
+        }
+      } catch (e) {
+        console.error("Push de orden a WooCommerce fallo:", e.message);
+      }
+    }
+
     const { data: completo } = await supabase
       .from("ordenes")
       .select("*, orden_items(*)")
@@ -554,6 +588,17 @@ router.delete("/api/ordenes/:id", authRequerido, async (req, res, next) => {
       .eq("id", Number(req.params.id));
     if (error) throw error;
     res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------- Sincronización (WooCommerce -> Supabase, órdenes) ----------
+router.post("/api/admin/sync", authRequerido, async (req, res, next) => {
+  try {
+    if (!supabase) throw new Error("Supabase no configurado");
+    const resumen = await sincronizarOrdenesDesdeWooCommerce();
+    res.json(resumen);
   } catch (err) {
     next(err);
   }
