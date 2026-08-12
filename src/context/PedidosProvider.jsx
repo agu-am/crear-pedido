@@ -33,6 +33,8 @@ const PedidosProvider = ({ children }) => {
   const [ordenes, setOrdenes] = useState([]);
   const [errorOrdenes, setErrorOrdenes] = useState(false);
   const [cargandoOrdenes, setCargandoOrdenes] = useState(true);
+  const [filtroDesde, setFiltroDesde] = useState("");
+  const [filtroHasta, setFiltroHasta] = useState("");
   const [toggleMenu, setToggleMenu] = useState(false);
   const [paginaProductos, setPaginaProductos] = useState(1);
   const [hayMasProductos, setHayMasProductos] = useState(false);
@@ -128,14 +130,19 @@ const PedidosProvider = ({ children }) => {
     setCargandoOrdenes(true);
     try {
       setErrorOrdenes(false);
-      const { data } = await api.get("/ordenes");
+      const { data } = await api.get("/ordenes", {
+        params: {
+          desde: filtroDesde || undefined,
+          hasta: filtroHasta || undefined,
+        },
+      });
       setOrdenes(data);
     } catch (error) {
       setErrorOrdenes(true);
     } finally {
       setCargandoOrdenes(false);
     }
-  }, []);
+  }, [filtroDesde, filtroHasta]);
 
   const actualizarOrden = async (id, datos) => {
     if (usarPedidosEjemplo) {
@@ -341,6 +348,10 @@ const PedidosProvider = ({ children }) => {
         ordenes,
         obtenerOrdenes,
         cargandoOrdenes,
+        filtroDesde,
+        setFiltroDesde,
+        filtroHasta,
+        setFiltroHasta,
         crearOrden,
         actualizarOrden,
         eliminarOrden,

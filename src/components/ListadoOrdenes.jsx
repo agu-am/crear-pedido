@@ -9,7 +9,17 @@ import { FaClipboardList, FaEdit, FaTrashAlt } from "react-icons/fa"
 const INTERVALO_REFRESCO = 30000
 
 const ListadoOrdenes = () => {
-    const { ordenes, errorOrdenes, cargandoOrdenes, eliminarOrden, obtenerOrdenes } = usePedido()
+    const {
+        ordenes,
+        errorOrdenes,
+        cargandoOrdenes,
+        eliminarOrden,
+        obtenerOrdenes,
+        filtroDesde,
+        setFiltroDesde,
+        filtroHasta,
+        setFiltroHasta,
+    } = usePedido()
     const [editando, setEditando] = useState(null)
     const [eliminando, setEliminando] = useState(false)
 
@@ -69,7 +79,40 @@ const ListadoOrdenes = () => {
 
     return (
         <div className="mx-auto max-w-6xl px-4 py-8">
-            <h1 className="mb-6 text-display-xs text-ink">Órdenes</h1>
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                <h1 className="text-display-xs text-ink">Órdenes</h1>
+                <div className="flex flex-wrap items-end gap-3">
+                    <div>
+                        <label htmlFor="filtro-desde" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute">Desde</label>
+                        <input
+                            id="filtro-desde"
+                            type="date"
+                            value={filtroDesde}
+                            onChange={(e) => setFiltroDesde(e.target.value)}
+                            className="rounded-xl border border-ink bg-canvas px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="filtro-hasta" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute">Hasta</label>
+                        <input
+                            id="filtro-hasta"
+                            type="date"
+                            value={filtroHasta}
+                            onChange={(e) => setFiltroHasta(e.target.value)}
+                            className="rounded-xl border border-ink bg-canvas px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        />
+                    </div>
+                    {(filtroDesde || filtroHasta) && (
+                        <button
+                            type="button"
+                            onClick={() => { setFiltroDesde(""); setFiltroHasta("") }}
+                            className="rounded-full border border-ink px-3 py-2 text-sm font-semibold text-ink transition hover:bg-canvas-soft"
+                        >
+                            Limpiar
+                        </button>
+                    )}
+                </div>
+            </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {ordenes.map(o => {
                     const nombreCliente = o.billing?.first_name || ""

@@ -3,8 +3,9 @@ import api from "../helpers/api";
 import { notificarExito, notificarError } from "../helpers/toast";
 import Error from "../components/Error";
 import ModalProducto from "../components/ModalProducto";
+import ModalCargaMasiva from "../components/ModalCargaMasiva";
 import Paginador from "../components/Paginador";
-import { FaPlus, FaSearch, FaEdit } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEdit, FaUpload } from "react-icons/fa";
 
 const TAMANIO_PAGINA = 50;
 
@@ -23,6 +24,7 @@ const Productos = () => {
   const [error, setError] = useState(false);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState(null);
+  const [modalCarga, setModalCarga] = useState(false);
   const [orden, setOrden] = useState({ clave: "name", dir: "asc" });
 
   const obtener = useCallback(async (search, page) => {
@@ -110,12 +112,20 @@ const Productos = () => {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-display-xs text-ink">Productos</h1>
-        <button
-          onClick={abrirNuevo}
-          className="flex items-center justify-center gap-2 rounded-3xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-        >
-          <FaPlus size="0.8rem" /> Nuevo producto
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setModalCarga(true)}
+            className="flex items-center justify-center gap-2 rounded-3xl border border-ink px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-canvas-soft"
+          >
+            <FaUpload size="0.8rem" /> Cargar productos
+          </button>
+          <button
+            onClick={abrirNuevo}
+            className="flex items-center justify-center gap-2 rounded-3xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+          >
+            <FaPlus size="0.8rem" /> Nuevo producto
+          </button>
+        </div>
       </div>
 
       <div className="relative mb-4 max-w-md">
@@ -199,6 +209,12 @@ const Productos = () => {
         producto={editando}
         onCerrar={() => setModalAbierto(false)}
         onGuardar={guardar}
+      />
+
+      <ModalCargaMasiva
+        abierto={modalCarga}
+        onCerrar={() => setModalCarga(false)}
+        onAplicado={() => obtener(busqueda, pagina)}
       />
     </div>
   )

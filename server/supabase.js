@@ -129,6 +129,19 @@ async function empujarClienteACW(datos, wcId) {
   }
 }
 
+async function paralelo(items, fn, conc = 6) {
+  const resultados = [];
+  let index = 0;
+  async function worker() {
+    while (index < items.length) {
+      const i = index++;
+      resultados[i] = await fn(items[i]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(conc, items.length) }, worker));
+  return resultados;
+}
+
 // ---------- Auth ----------
 router.post("/api/login", async (req, res, next) => {
   try {
@@ -317,6 +330,134 @@ router.put("/api/productos/:id", authRequerido, async (req, res, next) => {
   }
 });
 
+// ---------- Carga masiva de productos (match por SKU: actualizar o crear) ----------
+function normalizarFilaProducto(r = {}) {
+  const sku = String(r.sku ?? "").trim();
+  const name = String(r.name ?? "").trim();
+  const precio =
+    r.price === "" || r.price === undefined || r.price === null ? null : Number(r.price);
+  const sale =
+    r.sale_price === "" || r.sale_price === undefined || r.sale_price === null
+      ? null
+      : Number(r.sale_price);
+  const stock =
+    r.stock_quantity === "" || r.stock_quantity === undefined || r.stock_quantity === null
+      ? null
+      : Number(r.stock_quantity);
+  return {
+    sku,
+    name,
+    precio,
+    sale,
+    stock,
+    stock_status:
+      r.stock_status ||
+      (stock !== null ? (stock > 0 ? "instock" : "outofstock") : "instock"),
+    unidad_medida: r.unidad_medida || "unidad",
+    status: r.status || "publish",
+    description: r.description || "",
+  };
+}
+
+router.post("/api/admin/productos/preview", authRequerido, async (req, res, next) => {
+  try {
+    if (!supabase) throw new Error("Supabase no configurado");
+    const filas = Array.isArray(req.body?.productos) ? req.body.productos : [];
+    if (!filas.length) return res.status(400).json({ message: "No hay productos para procesar" });
+
+    const aActualizar = [];
+    const aCrear = [];
+    const errores = [];
+
+    for (let i = 0; i < filas.length; i++) {
+      const p = normalizarFilaProducto(filas[i]);
+      if (!p.sku) {
+        errores.push({ fila: i + 1, motivo: "Falta SKU" });
+        continue;
+      }
+      if (!p.name) {
+        errores.push({ fila: i + 1, motivo: "Falta nombre" });
+        continue;
+      }
+      if (p.precio !== null && (Number.isNaN(p.precio) || p.precio < 0)) {
+        errores.push({ fila: i + 1, motivo: "Precio inválido" });
+        continue;
+      }
+      const { data } = await supabase.from("productos").select("id").eq("sku", p.sku).limit(1);
+      if (data && data.length) aActualizar.push({ fila: i + 1, sku: p.sku, name: p.name });
+      else aCrear.push({ fila: i + 1, sku: p.sku, name: p.name });
+    }
+
+    res.json({ aActualizar, aCrear, errores });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/api/admin/productos/aplicar", authRequerido, async (req, res, next) => {
+  try {
+    if (!supabase) throw new Error("Supabase no configurado");
+    const filas = Array.isArray(req.body?.productos) ? req.body.productos : [];
+    let actualizados = 0;
+    let creados = 0;
+    const pendientesPush = [];
+
+    for (const fila of filas) {
+      const p = normalizarFilaProducto(fila);
+      if (!p.sku || !p.name) continue;
+      if (p.precio !== null && (Number.isNaN(p.precio) || p.precio < 0)) continue;
+
+      const payload = {
+        sku: p.sku,
+        name: p.name,
+        regular_price: p.precio,
+        sale_price: p.sale,
+        price: p.precio,
+        stock_quantity: p.stock,
+        stock_status: p.stock_status,
+        unidad_medida: p.unidad_medida,
+        status: p.status,
+        description: p.description,
+      };
+
+      const { data: existente } = await supabase
+        .from("productos")
+        .select("id,woocommerce_id")
+        .eq("sku", p.sku)
+        .limit(1);
+      if (existente && existente.length) {
+        await supabase.from("productos").update(payload).eq("sku", p.sku);
+        actualizados++;
+        pendientesPush.push({ payload, wcId: existente[0].woocommerce_id, id: existente[0].id });
+      } else {
+        const { data: creado, error } = await supabase
+          .from("productos")
+          .insert({ ...payload, woocommerce_id: null, image_url: "", type: "simple" })
+          .select()
+          .single();
+        if (error) throw error;
+        creados++;
+        pendientesPush.push({ payload, wcId: null, id: creado.id });
+      }
+    }
+
+    await paralelo(pendientesPush, async (item) => {
+      try {
+        const wcId = await empujarProductoACW(item.payload, item.wcId);
+        if (wcId && item.wcId === null) {
+          await supabase.from("productos").update({ woocommerce_id: wcId }).eq("id", item.id);
+        }
+      } catch {
+        // push best-effort
+      }
+    }, 5);
+
+    res.json({ actualizados, creados });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ---------- Clientes ----------
 router.get("/api/clientes", async (req, res, next) => {
   try {
@@ -430,11 +571,19 @@ router.put("/api/clientes/:id/telefono", authRequerido, async (req, res, next) =
 router.get("/api/ordenes", authRequerido, async (req, res, next) => {
   try {
     if (!supabase) throw new Error("Supabase no configurado");
-    const { data, error } = await supabase
+    const { desde, hasta } = req.query;
+    let query = supabase
       .from("ordenes")
       .select("*, orden_items(*)")
       .order("fecha", { ascending: false })
       .limit(200);
+    if (desde) {
+      query = query.gte("fecha", new Date(`${desde}T00:00:00`).toISOString());
+    }
+    if (hasta) {
+      query = query.lte("fecha", new Date(`${hasta}T23:59:59.999`).toISOString());
+    }
+    const { data, error } = await query;
     if (error) throw error;
     res.json((data || []).map(formatearOrden));
   } catch (err) {

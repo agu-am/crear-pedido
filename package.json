@@ -28,7 +28,8 @@
     "react-select": "^5.8.0",
     "react-toastify": "^10.0.4",
     "serverless-http": "^4.0.0",
-    "tailwindcss-animated": "^1.0.1"
+    "tailwindcss-animated": "^1.0.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
