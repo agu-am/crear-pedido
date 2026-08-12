@@ -1,15 +1,14 @@
 import "dotenv/config";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 import express from "express";
 import cors from "cors";
 import { wcFetch, wcFetchPaginado, wcFetchConTotal, validarCredenciales } from "./lib/wc.js";
 import { emitirToken, authRequerido } from "./lib/auth.js";
 import { routerSupabase } from "./supabase.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const distDir = path.resolve(__dirname, "../dist");
+// Sirve el frontend compilado (dist/) cuando el server corre desde la raiz del repo
+const distDir = path.resolve(process.cwd(), "dist");
 
 const app = express();
 
