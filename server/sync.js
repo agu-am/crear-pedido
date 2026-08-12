@@ -1,16 +1,35 @@
 import { supabase } from "./supabase.js";
 import { wcFetchPaginado } from "./lib/wc.js";
 
-async function traerTodo(path, queryParams = {}) {
-  const items = [];
-  let page = 1;
-  for (;;) {
-    const r = await wcFetchPaginado(path, {
-      query: { per_page: 100, page, ...queryParams },
-    });
-    items.push(...r.items);
-    if (page >= r.totalPages || r.items.length === 0) break;
-    page++;
+// Ejecuta `fn` sobre los items con un pool de concurrencia acotado
+async function paralelo(items, fn, conc = 8) {
+  const resultados = [];
+  let index = 0;
+  async function worker() {
+    while (index < items.length) {
+      const i = index++;
+      resultados[i] = await fn(items[i]);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(conc, items.length) }, worker)
+  );
+  return resultados;
+}
+
+async function traerTodoParalelo(path, queryParams = {}) {
+  const primera = await wcFetchPaginado(path, {
+    query: { per_page: 100, page: 1, ...queryParams },
+  });
+  const items = [...primera.items];
+  const totalPages = primera.totalPages;
+  if (totalPages > 1) {
+    const paginas = [];
+    for (let p = 2; p <= totalPages; p++) paginas.push(p);
+    const resultados = await paralelo(paginas, (p) =>
+      wcFetchPaginado(path, { query: { per_page: 100, page: p, ...queryParams } })
+    );
+    resultados.forEach((r) => items.push(...r.items));
   }
   return items;
 }
@@ -26,17 +45,18 @@ function lotes(arr, n) {
 }
 
 // Trae las órdenes de WooCommerce a Supabase (upsert por woocommerce_id) y reconstruye sus items.
-// Solo toca las órdenes que vienen de WooCommerce (las de la app no se borran).
 export async function sincronizarOrdenesDesdeWooCommerce() {
   if (!supabase) throw new Error("Supabase no configurado");
 
-  const ordenes = await traerTodo("orders", {
+  const ordenes = await traerTodoParalelo("orders", {
     _fields: "id,billing,line_items,date_created,customer_note,status,total,customer_id",
   });
 
-  const { data: cliDb } = await supabase.from("clientes").select("id,woocommerce_id");
+  const [{ data: cliDb }, { data: prodDb }] = await Promise.all([
+    supabase.from("clientes").select("id,woocommerce_id"),
+    supabase.from("productos").select("id,woocommerce_id"),
+  ]);
   const cliMap = new Map((cliDb || []).map((c) => [c.woocommerce_id, c.id]));
-  const { data: prodDb } = await supabase.from("productos").select("id,woocommerce_id");
   const prodMap = new Map((prodDb || []).map((p) => [p.woocommerce_id, p.id]));
 
   const rows = ordenes.map((o) => ({
@@ -50,25 +70,20 @@ export async function sincronizarOrdenesDesdeWooCommerce() {
     fecha: o.date_created ? new Date(o.date_created).toISOString() : null,
   }));
 
-  const ids = [];
-  for (const lote of lotes(rows, 100)) {
-    const { data: insertados, error } = await supabase
+  const insertados = await paralelo(lotes(rows, 100), async (lote) => {
+    const { data, error } = await supabase
       .from("ordenes")
       .upsert(lote, { onConflict: "woocommerce_id" })
       .select("id,woocommerce_id");
     if (error) throw error;
-    ids.push(...(insertados || []));
-  }
+    return data || [];
+  });
+  const ids = insertados.flat();
   const ordMap = new Map(ids.map((o) => [o.woocommerce_id, o.id]));
   const ordenesSupabaseIds = ids.map((o) => o.id);
 
-  // Reconstruir items SOLO de las órdenes sincronizadas
   if (ordenesSupabaseIds.length) {
-    const { error: del } = await supabase
-      .from("orden_items")
-      .delete()
-      .in("orden_id", ordenesSupabaseIds);
-    if (del) throw del;
+    await supabase.from("orden_items").delete().in("orden_id", ordenesSupabaseIds);
   }
 
   const itemsRows = [];
@@ -87,10 +102,10 @@ export async function sincronizarOrdenesDesdeWooCommerce() {
       });
     });
   });
-  for (const lote of lotes(itemsRows, 500)) {
+  await paralelo(lotes(itemsRows, 500), async (lote) => {
     const { error } = await supabase.from("orden_items").insert(lote);
     if (error) throw error;
-  }
+  });
 
   return { ordenes: ordenes.length, items: itemsRows.length };
 }
