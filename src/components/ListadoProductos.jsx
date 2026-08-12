@@ -2,6 +2,7 @@ import Producto from "./Producto"
 import usePedido from "../hooks/usePedido"
 import CardProductoSkeleton from "./CardProductoSkeleton"
 import Error from "./Error"
+import SelectCategoria from "./SelectCategoria"
 import { FaSearch } from "react-icons/fa"
 
 const ListadoProductos = () => {
@@ -21,13 +22,6 @@ const ListadoProductos = () => {
         errorCategorias,
     } = usePedido()
 
-    const chipCls = (activa) =>
-        `shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-            activa
-                ? "border-transparent bg-positive-pale text-positive-deep"
-                : "border-ink bg-canvas text-ink hover:bg-canvas-soft"
-        }`
-
     return (
         <section>
             <div className="relative mb-3">
@@ -42,25 +36,11 @@ const ListadoProductos = () => {
             </div>
 
             {!errorCategorias && categorias.length > 0 && (
-                <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <button
-                        type="button"
-                        onClick={() => setCategoriaSeleccionada("")}
-                        className={chipCls(categoriaSeleccionada === "")}
-                    >
-                        Todas
-                    </button>
-                    {categorias.map(c => (
-                        <button
-                            key={c.id}
-                            type="button"
-                            onClick={() => setCategoriaSeleccionada(String(c.id))}
-                            className={chipCls(categoriaSeleccionada === String(c.id))}
-                        >
-                            {c.name}
-                        </button>
-                    ))}
-                </div>
+                <SelectCategoria
+                    categorias={categorias}
+                    value={categoriaSeleccionada}
+                    onChange={setCategoriaSeleccionada}
+                />
             )}
 
             {errorProductos && <Error mensaje={"No se pudieron cargar los productos"} />}
