@@ -597,7 +597,7 @@ router.delete("/api/ordenes/:id", authRequerido, async (req, res, next) => {
 router.post("/api/admin/sync", authRequerido, async (req, res, next) => {
   try {
     if (!supabase) throw new Error("Supabase no configurado");
-    const resumen = await sincronizarOrdenesDesdeWooCommerce();
+    const resumen = await sincronizarOrdenesDesdeWooCommerce({ dias: 30 });
     res.json(resumen);
   } catch (err) {
     next(err);

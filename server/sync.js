@@ -45,12 +45,17 @@ function lotes(arr, n) {
 }
 
 // Trae las órdenes de WooCommerce a Supabase (upsert por woocommerce_id) y reconstruye sus items.
-export async function sincronizarOrdenesDesdeWooCommerce() {
+// `dias` > 0 limita a las órdenes de los últimos N días (botón Sincronizar, rápido).
+export async function sincronizarOrdenesDesdeWooCommerce({ dias = 0 } = {}) {
   if (!supabase) throw new Error("Supabase no configurado");
 
-  const ordenes = await traerTodoParalelo("orders", {
+  const query = {
     _fields: "id,billing,line_items,date_created,customer_note,status,total,customer_id",
-  });
+  };
+  if (dias > 0) {
+    query.after = new Date(Date.now() - dias * 86400000).toISOString();
+  }
+  const ordenes = await traerTodoParalelo("orders", query);
 
   const [{ data: cliDb }, { data: prodDb }] = await Promise.all([
     supabase.from("clientes").select("id,woocommerce_id"),
