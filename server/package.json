@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "migrate": "node scripts/migrate.mjs"
+    "migrate": "node scripts/migrate.mjs",
+    "build": "node --check index.js"
   },
   "engines": {
     "node": ">=18"
