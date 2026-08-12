@@ -35,6 +35,9 @@ const PedidosProvider = ({ children }) => {
   const [toggleMenu, setToggleMenu] = useState(false);
   const [paginaProductos, setPaginaProductos] = useState(1);
   const [hayMasProductos, setHayMasProductos] = useState(false);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
+  const [errorCategorias, setErrorCategorias] = useState(false);
 
   const productosPorPagina = 25;
 
@@ -45,6 +48,7 @@ const PedidosProvider = ({ children }) => {
         const { data } = await api.get("/productos", {
           params: {
             search: busqueda,
+            categoria: categoriaSeleccionada || undefined,
             page: pagina,
             per_page: productosPorPagina,
           },
@@ -60,7 +64,7 @@ const PedidosProvider = ({ children }) => {
         setCargandoMasProductos(false);
       }
     },
-    [busqueda]
+    [busqueda, categoriaSeleccionada]
   );
 
   useEffect(() => {
@@ -71,6 +75,20 @@ const PedidosProvider = ({ children }) => {
     }, 300);
     return () => clearTimeout(timer);
   }, [busqueda, obtenerProductos]);
+
+  const obtenerCategorias = useCallback(async () => {
+    try {
+      setErrorCategorias(false);
+      const { data } = await api.get("/categorias");
+      setCategorias(data.items || []);
+    } catch (error) {
+      setErrorCategorias(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    obtenerCategorias();
+  }, [obtenerCategorias]);
 
   const cargarMasProductos = () => {
     if (cargandoMasProductos) return;
@@ -327,6 +345,10 @@ const PedidosProvider = ({ children }) => {
         setToggleMenu,
         handleAgregarAlCarrito,
         total,
+        categorias,
+        categoriaSeleccionada,
+        setCategoriaSeleccionada,
+        errorCategorias,
       }}
     >
       {children}

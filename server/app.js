@@ -39,7 +39,7 @@ function leerCache(key) {
   return item.valor;
 }
 
-// Indice de SKUs (id -> sku) para busquedas parciales. Se construye una vez y se cachea.
+// Indice de SKUs (id -> { sku, categorias }) para busquedas parciales. Se construye una vez y se cachea.
 const indiceSku = new Map();
 let indiceSkuCargadoEn = 0;
 const INDICE_SKU_TTL = 10 * 60 * 1000;
@@ -50,10 +50,15 @@ async function cargarIndiceSkus() {
   let page = 1;
   for (;;) {
     const r = await wcFetchPaginado("products", {
-      query: { _fields: "id,sku", per_page: 100, page },
+      query: { _fields: "id,sku,categories", per_page: 100, page },
     });
     r.items.forEach((p) => {
-      if (p.sku) nuevo.set(p.id, p.sku);
+      if (p.sku) {
+        nuevo.set(p.id, {
+          sku: p.sku,
+          categorias: (p.categories || []).map((c) => c.id),
+        });
+      }
     });
     if (page >= r.totalPages || r.items.length === 0) break;
     page++;
@@ -284,7 +289,8 @@ app.get("/api/productos", async (req, res, next) => {
     const page = Number(req.query.page || 1);
     const perPage = Number(req.query.per_page || 25);
     const search = (req.query.search || "").trim();
-    const key = `productos:${search}:${page}:${perPage}`;
+    const categoria = (req.query.categoria || "").trim();
+    const key = `productos:${search}:${categoria}:${page}:${perPage}`;
     const cacheado = leerCache(key);
     if (cacheado) return res.json(cacheado);
 
@@ -293,6 +299,7 @@ app.get("/api/productos", async (req, res, next) => {
         _fields:
           "id,name,sku,regular_price,sale_price,price,stock_quantity,stock_status,status,type,description",
         search,
+        category: categoria || undefined,
         per_page: perPage,
         page,
       },
@@ -305,12 +312,20 @@ app.get("/api/productos", async (req, res, next) => {
       const CAMPOS =
         "id,name,sku,regular_price,sale_price,price,stock_quantity,stock_status,status,type,description";
       const yaExiste = (id) => items.some((i) => i.id === id);
+      const enCategoria = (categorias) =>
+        !categoria || (categorias || []).includes(Number(categoria));
 
       try {
         const porSku = await wcFetchPaginado("products", {
-          query: { _fields: CAMPOS, sku: search, per_page: 1, page: 1 },
+          query: {
+            _fields: CAMPOS + ",categories",
+            sku: search,
+            per_page: 1,
+            page: 1,
+          },
         });
         porSku.items.forEach((p) => {
+          if (!enCategoria((p.categories || []).map((c) => c.id))) return;
           const fp = formatearProducto(p);
           if (!yaExiste(fp.id)) items.unshift(fp);
         });
@@ -324,8 +339,11 @@ app.get("/api/productos", async (req, res, next) => {
           await cargarIndiceSkus();
           const term = search.toLowerCase();
           const ids = [];
-          for (const [id, sku] of indiceSku) {
-            if (sku.toLowerCase().includes(term)) {
+          for (const [id, info] of indiceSku) {
+            if (
+              info.sku.toLowerCase().includes(term) &&
+              enCategoria(info.categorias)
+            ) {
               ids.push(id);
               if (ids.length >= 25) break;
             }
@@ -346,6 +364,30 @@ app.get("/api/productos", async (req, res, next) => {
     }
 
     resultado.items = items;
+    cachear(key, resultado);
+    res.json(resultado);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---- Categorías (público, solo lectura) ----
+app.get("/api/categorias", async (req, res, next) => {
+  try {
+    const key = "categorias";
+    const cacheado = leerCache(key);
+    if (cacheado) return res.json(cacheado);
+
+    const resultado = await wcFetchPaginado("products/categories", {
+      query: {
+        hide_empty: true,
+        per_page: 100,
+        _fields: "id,name,slug,count",
+      },
+    });
+    resultado.items = resultado.items.sort((a, b) =>
+      a.name.localeCompare(b.name, "es")
+    );
     cachear(key, resultado);
     res.json(resultado);
   } catch (err) {

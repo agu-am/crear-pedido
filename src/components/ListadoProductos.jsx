@@ -15,11 +15,22 @@ const ListadoProductos = () => {
         cargarMasProductos,
         hayMasProductos,
         errorProductos,
+        categorias,
+        categoriaSeleccionada,
+        setCategoriaSeleccionada,
+        errorCategorias,
     } = usePedido()
+
+    const chipCls = (activa) =>
+        `shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+            activa
+                ? "border-transparent bg-positive-pale text-positive-deep"
+                : "border-ink bg-canvas text-ink hover:bg-canvas-soft"
+        }`
 
     return (
         <section>
-            <div className="relative mb-4">
+            <div className="relative mb-3">
                 <FaSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-mute" size="0.9rem" />
                 <input
                     type="text"
@@ -29,6 +40,28 @@ const ListadoProductos = () => {
                     className="w-full rounded-xl border border-ink bg-canvas py-3 pl-11 pr-4 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
             </div>
+
+            {!errorCategorias && categorias.length > 0 && (
+                <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <button
+                        type="button"
+                        onClick={() => setCategoriaSeleccionada("")}
+                        className={chipCls(categoriaSeleccionada === "")}
+                    >
+                        Todas
+                    </button>
+                    {categorias.map(c => (
+                        <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setCategoriaSeleccionada(String(c.id))}
+                            className={chipCls(categoriaSeleccionada === String(c.id))}
+                        >
+                            {c.name}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {errorProductos && <Error mensaje={"No se pudieron cargar los productos"} />}
 
