@@ -141,6 +141,7 @@ const Productos = () => {
                 <th className={thCls("regular_price")} onClick={() => cambiarOrden("regular_price")}>Precio</th>
                 <th className={thCls("sale_price")} onClick={() => cambiarOrden("sale_price")}>Oferta</th>
                 <th className={thCls("stock_quantity")} onClick={() => cambiarOrden("stock_quantity")}>Stock</th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-mute">Unidad</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-mute">Estado</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-mute">Acciones</th>
               </tr>
@@ -148,11 +149,11 @@ const Productos = () => {
             <tbody>
               {cargando ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-mute">Cargando...</td>
+                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-mute">Cargando...</td>
                 </tr>
               ) : itemsOrdenados.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-mute">Sin resultados</td>
+                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-mute">Sin resultados</td>
                 </tr>
               ) : (
                 itemsOrdenados.map((p) => {
@@ -170,6 +171,7 @@ const Productos = () => {
                       <td className="px-4 py-3 text-sm text-body">
                         {p.stock_quantity !== undefined && p.stock_quantity !== null && p.stock_quantity !== "" ? p.stock_quantity : "—"}
                       </td>
+                      <td className="px-4 py-3 text-sm text-body">{p.unidad_medida || "unidad"}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${badge.cls}`}>{badge.label}</span>
                       </td>

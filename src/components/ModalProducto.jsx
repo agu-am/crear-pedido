@@ -7,6 +7,7 @@ const inicial = (producto) => ({
   regular_price: producto?.regular_price ?? "",
   sale_price: producto?.sale_price ?? "",
   stock_quantity: producto?.stock_quantity ?? "",
+  unidad_medida: producto?.unidad_medida || "unidad",
   estado:
     producto?.status === "draft"
       ? "draft"
@@ -37,6 +38,7 @@ const ModalProducto = ({ abierto, producto, onCerrar, onGuardar }) => {
       regular_price: form.regular_price === "" ? undefined : form.regular_price,
       sale_price: form.sale_price === "" ? undefined : form.sale_price,
       stock_quantity: form.stock_quantity === "" ? undefined : form.stock_quantity,
+      unidad_medida: form.unidad_medida.trim() || "unidad",
       status: form.estado === "draft" ? "draft" : "publish",
       stock_status: form.estado === "outofstock" ? "outofstock" : "instock",
       description: form.description.trim(),
@@ -92,6 +94,11 @@ const ModalProducto = ({ abierto, producto, onCerrar, onGuardar }) => {
               <label htmlFor="p-oferta" className={labelCls}>Precio de oferta</label>
               <input id="p-oferta" type="number" step="0.01" min="0" value={form.sale_price} onChange={set("sale_price")} className={inputCls} />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="p-unidad" className={labelCls}>Unidad de medida</label>
+            <input id="p-unidad" type="text" value={form.unidad_medida} onChange={set("unidad_medida")} className={inputCls} placeholder="unidad" />
           </div>
 
           <div>

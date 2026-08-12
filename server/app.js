@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import { wcFetch, wcFetchPaginado, wcFetchConTotal, validarCredenciales } from "./lib/wc.js";
 import { emitirToken, authRequerido } from "./lib/auth.js";
+import { initDb } from "./db.js";
+import { routerMysql } from "./mysql.js";
 
 const app = express();
 
@@ -21,6 +23,17 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Modo MySQL: la app lee/escribe en la base propia (WooCommerce queda solo para el sitio publico)
+const dataSource = (process.env.DATA_SOURCE || "woocommerce").toLowerCase();
+if (dataSource === "mysql") {
+  try {
+    await initDb();
+  } catch (e) {
+    console.error("Error inicializando MySQL:", e.message);
+  }
+  app.use(routerMysql);
+}
 
 const cache = new Map();
 const CACHE_TTL = Number(process.env.CACHE_TTL || 60) * 1000;

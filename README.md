@@ -110,6 +110,40 @@ netlify deploy --prod
 
 > Nota: no versionar el token ni las claves. `node_bundler = "esbuild"` está fijado en `netlify.toml` para evitar el error "Unsupported framework" del bundler por defecto.
 
+## Base de datos propia (MySQL) — independizarse de WooCommerce
+
+El proxy puede usar **MySQL** como fuente de datos de la app (productos, clientes, órdenes y login) en vez de WooCommerce. WooCommerce queda solo para el sitio público (se le "empuja" cada escritura para mantener la tienda sincronizada).
+
+### Configuración
+En `server/.env`:
+
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=usuario
+DB_PASSWORD=clave
+DB_NAME=nombre_bd
+DATA_SOURCE=mysql        # woocommerce (default) | mysql
+```
+
+- Las tablas se crean solas al arrancar (`usuarios`, `categorias`, `productos`, `producto_categorias`, `clientes`, `ordenes`, `orden_items`).
+- Si `DB_HOST` no está configurado, el proxy sigue con WooCommerce (modo por defecto).
+
+### Migración (una vez)
+1. Crear la base MySQL en hPanel.
+2. En `server/.env`: `DB_*`, `DATA_SOURCE=woocommerce` (o dejarlo), `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
+3. Ejecutar:
+   ```bash
+   cd server
+   npm run migrate
+   ```
+   Copia desde WooCommerce: categorías, productos (con URL de imagen y `unidad_medida`), clientes y **todas las órdenes**. Crea tu usuario como **admin** y los vendedores como usuarios **vendedor** (con contraseñas iniciales aleatorias que se imprimen al final para distribuir).
+
+### Corte
+Cuando verifiques la migración, cambiar `DATA_SOURCE=mysql`, reiniciar el proxy y probar. WooCommerce queda intacto (solo se usa para el push del sitio público).
+
+> La migración es re-ejecutable: correla de nuevo antes del corte para capturar cambios recientes.
+
 ## Desarrollo
 
 ```bash
