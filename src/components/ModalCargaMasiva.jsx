@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
-import { FaFileUpload } from "react-icons/fa";
+import { FaFileUpload, FaFileDownload } from "react-icons/fa";
 import { notificarExito, notificarError } from "../helpers/toast";
 
 const quitarAcentos = (s) =>
@@ -17,8 +17,8 @@ const normalizar = (raw) => {
     sku: row.sku || row.codigo || row.cod,
     name: row.name || row.nombre || row.producto,
     price: row.price ?? row.precio ?? row.regularprice ?? row.precioregular,
-    sale_price: row.saleprice ?? row.oferta ?? row.preciooferta,
-    stock_quantity: row.stock ?? row.stockquantity ?? row.cantidad,
+    sale_price: row.saleprice ?? row.oferta ?? row.preciooferta ?? row.preciodeoferta,
+    stock_quantity: row.stock ?? row.stockquantity ?? row.cantidad ?? row.stockcantidad,
     unidad_medida: row.unidad ?? row.unidadmedida,
     status: row.status ?? row.estado,
     description: row.description ?? row.descripcion,
@@ -63,6 +63,35 @@ const ModalCargaMasiva = ({ abierto, onCerrar, onAplicado }) => {
     }
   };
 
+  const descargarEjemplo = () => {
+    const datos = [
+      {
+        SKU: "500240",
+        Nombre: "Pan Hamburguesa gastro.papa c/sesam1p 20u fargo",
+        Precio: "13782.94",
+        Oferta: "",
+        Stock: "10",
+        Unidad: "unidad",
+        Estado: "publish",
+        Descripcion: "",
+      },
+      {
+        SKU: "EXCEL-TEST-001",
+        Nombre: "Producto nuevo de ejemplo",
+        Precio: "1000",
+        Oferta: "800",
+        Stock: "5",
+        Unidad: "kg",
+        Estado: "publish",
+        Descripcion: "Producto cargado desde Excel",
+      },
+    ];
+    const hoja = XLSX.utils.json_to_sheet(datos);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Productos");
+    XLSX.writeFile(libro, "productos-ejemplo.xlsx");
+  };
+
   const aplicar = async () => {
     setAplicando(true);
     try {
@@ -100,6 +129,14 @@ const ModalCargaMasiva = ({ abierto, onCerrar, onAplicado }) => {
           className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-ink px-4 py-6 text-sm font-semibold text-ink transition hover:bg-canvas-soft"
         >
           <FaFileUpload size="1.1rem" /> {nombreArchivo || "Seleccionar archivo (Excel / CSV)"}
+        </button>
+
+        <button
+          type="button"
+          onClick={descargarEjemplo}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-canvas-soft px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-canvas"
+        >
+          <FaFileDownload size="0.9rem" /> Descargar plantilla de ejemplo
         </button>
 
         {cargando && (
