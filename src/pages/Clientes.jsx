@@ -5,8 +5,9 @@ import Error from "../components/Error";
 import Paginador from "../components/Paginador";
 import ModalNuevoCliente from "../components/ModalNuevoCliente";
 import ModalEditarCliente from "../components/ModalEditarCliente";
+import ModalCargaClientes from "../components/ModalCargaClientes";
 import ConfirmarModal from "../components/ConfirmarModal";
-import { FaUserPlus, FaEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
+import { FaUserPlus, FaEdit, FaSearch, FaTrashAlt, FaUpload } from "react-icons/fa";
 
 const TAMANIO_PAGINA = 25;
 
@@ -18,6 +19,7 @@ const Clientes = () => {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(false);
     const [modalNuevo, setModalNuevo] = useState(false);
+    const [modalCarga, setModalCarga] = useState(false);
     const [editando, setEditando] = useState(null);
     const [eliminando, setEliminando] = useState(null);
     const [cargandoEliminar, setCargandoEliminar] = useState(false);
@@ -75,12 +77,20 @@ const Clientes = () => {
         <div className="mx-auto max-w-6xl px-4 py-8">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h1 className="text-display-xs text-ink">Clientes</h1>
-                <button
-                    onClick={() => setModalNuevo(true)}
-                    className="flex items-center justify-center gap-2 rounded-3xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-                >
-                    <FaUserPlus size="0.8rem" /> Nuevo cliente
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setModalCarga(true)}
+                        className="flex items-center justify-center gap-2 rounded-3xl border border-ink px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-canvas-soft"
+                    >
+                        <FaUpload size="0.8rem" /> Cargar clientes
+                    </button>
+                    <button
+                        onClick={() => setModalNuevo(true)}
+                        className="flex items-center justify-center gap-2 rounded-3xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+                    >
+                        <FaUserPlus size="0.8rem" /> Nuevo cliente
+                    </button>
+                </div>
             </div>
 
             <div className="relative mb-4 max-w-md">
@@ -101,9 +111,9 @@ const Clientes = () => {
                     <table className="w-full min-w-[640px] border-collapse text-left">
                         <thead>
                             <tr className="border-b border-canvas-soft bg-canvas-soft/50">
-                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute">Nombre</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute">Email</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute">Vendedor</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute">Código</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute">Razón social</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute">Local</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute">Acciones</th>
                             </tr>
                         </thead>
@@ -119,9 +129,9 @@ const Clientes = () => {
                             ) : (
                                 items.map((c) => (
                                     <tr key={c.id} className="border-b border-canvas-soft transition last:border-0 hover:bg-canvas-soft/40">
-                                        <td className="px-4 py-3 text-sm font-medium text-ink">{c.name}</td>
-                                        <td className="px-4 py-3 text-sm text-body">{c.email}</td>
-                                        <td className="px-4 py-3 text-sm text-body">{c.phone}</td>
+                                        <td className="px-4 py-3 text-sm text-body">{c.codigo_interno}</td>
+                                        <td className="px-4 py-3 text-sm font-medium text-ink">{c.razon_social}</td>
+                                        <td className="px-4 py-3 text-sm text-body">{c.local}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <button
@@ -148,8 +158,14 @@ const Clientes = () => {
 
             <Paginador pagina={pagina} totalPaginas={totalPaginas} onCambiar={cambiarPagina} />
 
-            <ModalNuevoCliente modalNuevoCliente={modalNuevo} setModalNuevoCliente={setModalNuevo} />
+            <ModalNuevoCliente modalNuevoCliente={modalNuevo} setModalNuevoCliente={setModalNuevo} onGuardado={() => obtener(busqueda, pagina)} />
             <ModalEditarCliente cliente={editando} setCliente={setEditando} onGuardado={handleGuardadoCliente} />
+
+            <ModalCargaClientes
+                abierto={modalCarga}
+                onCerrar={() => setModalCarga(false)}
+                onAplicado={() => obtener(busqueda, pagina)}
+            />
 
             <ConfirmarModal
                 abierto={!!eliminando}

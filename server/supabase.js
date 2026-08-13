@@ -47,12 +47,14 @@ function formatearProducto(p) {
 function formatearCliente(c) {
   return {
     id: c.id,
-    name: c.first_name || c.username || "",
-    username: c.username || "",
+    name: c.razon_social || c.first_name || "",
     first_name: c.first_name || "",
     last_name: c.last_name || "",
     email: c.email || "",
     phone: c.phone || "",
+    codigo_interno: c.codigo_interno || "",
+    razon_social: c.razon_social || "",
+    local: c.local || "",
   };
 }
 
@@ -120,7 +122,7 @@ async function empujarClienteACW(datos, wcId) {
     }
     const creado = await wcFetch("customers", {
       method: "POST",
-      body: { username: datos.username, ...body },
+      body,
     });
     return creado.id;
   } catch (e) {
@@ -499,7 +501,7 @@ router.get("/api/clientes", async (req, res, next) => {
     let query = supabase.from("clientes").select("*", { count: "exact" }).order("first_name");
     if (search) {
       query = query.or(
-        `first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%,username.ilike.%${search}%`
+        `first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%,razon_social.ilike.%${search}%,codigo_interno.ilike.%${search}%`
       );
     }
     const from = (page - 1) * perPage;
@@ -517,19 +519,33 @@ router.get("/api/clientes", async (req, res, next) => {
 router.post("/api/clientes", authRequerido, async (req, res, next) => {
   try {
     if (!supabase) throw new Error("Supabase no configurado");
-    const { username, email, first_name } = req.body || {};
-    if (!username || !email) {
-      return res.status(400).json({ message: "Faltan username o email" });
+    const b = req.body || {};
+    const codigo_interno = String(b.codigo_interno ?? "").trim();
+    const razon_social = String(b.razon_social ?? "").trim();
+    const email = String(b.email ?? "").trim();
+    if (!razon_social) {
+      return res.status(400).json({ message: "Falta la razón social" });
     }
     const { data: creado, error } = await supabase
       .from("clientes")
-      .insert([{ woocommerce_id: null, username, first_name: first_name || "", last_name: "", email, phone: "" }])
+      .insert([
+        {
+          woocommerce_id: null,
+          first_name: "",
+          last_name: "",
+          email,
+          phone: String(b.phone ?? "").trim(),
+          codigo_interno,
+          razon_social,
+          local: String(b.local ?? "").trim(),
+        },
+      ])
       .select()
       .single();
     if (error) throw error;
 
     const wcId = await empujarClienteACW(
-      { username, email, first_name: first_name || "", last_name: "", telefono: "" },
+      { email, first_name: razon_social, last_name: "", telefono: "" },
       null
     );
     if (wcId) {
@@ -548,7 +564,7 @@ router.put("/api/clientes/:id", authRequerido, async (req, res, next) => {
     const b = req.body || {};
     const { data: existe } = await supabase
       .from("clientes")
-      .select("id,woocommerce_id,first_name,last_name,email,phone")
+      .select("id,woocommerce_id,first_name,last_name,email,phone,codigo_interno,razon_social,local")
       .eq("id", id)
       .maybeSingle();
     if (!existe) return res.status(404).json({ message: "Cliente no encontrado" });
@@ -560,6 +576,9 @@ router.put("/api/clientes/:id", authRequerido, async (req, res, next) => {
         last_name: b.last_name ?? existe.last_name,
         email: b.email ?? existe.email,
         phone: b.telefono ?? existe.phone,
+        codigo_interno: b.codigo_interno ?? existe.codigo_interno,
+        razon_social: b.razon_social ?? existe.razon_social,
+        local: b.local ?? existe.local,
       })
       .eq("id", id)
       .select()
@@ -622,6 +641,102 @@ router.delete("/api/clientes/:id", authRequerido, async (req, res, next) => {
       }
     }
     res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------- Carga masiva de clientes (match por código: actualizar o crear) ----------
+function normalizarFilaCliente(r = {}) {
+  return {
+    codigo_interno: String(r.codigo_interno ?? "").trim(),
+    razon_social: String(r.razon_social ?? "").trim(),
+    local: String(r.local ?? "").trim(),
+    email: String(r.email ?? "").trim(),
+    phone: String(r.phone ?? "").trim(),
+  };
+}
+
+router.post("/api/admin/clientes/preview", authRequerido, async (req, res, next) => {
+  try {
+    if (!supabase) throw new Error("Supabase no configurado");
+    const filas = Array.isArray(req.body?.clientes) ? req.body.clientes : [];
+    if (!filas.length) return res.status(400).json({ message: "No hay clientes para procesar" });
+
+    const aActualizar = [];
+    const aCrear = [];
+    const errores = [];
+
+    for (let i = 0; i < filas.length; i++) {
+      const c = normalizarFilaCliente(filas[i]);
+      if (!c.codigo_interno) {
+        errores.push({ fila: i + 1, motivo: "Falta código" });
+        continue;
+      }
+      if (!c.razon_social) {
+        errores.push({ fila: i + 1, motivo: "Falta razón social" });
+        continue;
+      }
+      const { data } = await supabase
+        .from("clientes")
+        .select("id")
+        .eq("codigo_interno", c.codigo_interno)
+        .limit(1);
+      if (data && data.length) aActualizar.push({ fila: i + 1, codigo: c.codigo_interno, razon_social: c.razon_social });
+      else aCrear.push({ fila: i + 1, codigo: c.codigo_interno, razon_social: c.razon_social });
+    }
+
+    res.json({ aActualizar, aCrear, errores });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/api/admin/clientes/aplicar", authRequerido, async (req, res, next) => {
+  try {
+    if (!supabase) throw new Error("Supabase no configurado");
+    const filas = Array.isArray(req.body?.clientes) ? req.body.clientes : [];
+    let actualizados = 0;
+    let creados = 0;
+
+    for (const fila of filas) {
+      const c = normalizarFilaCliente(fila);
+      if (!c.codigo_interno || !c.razon_social) continue;
+
+      const { data: existente } = await supabase
+        .from("clientes")
+        .select("id")
+        .eq("codigo_interno", c.codigo_interno)
+        .limit(1);
+      if (existente && existente.length) {
+        await supabase
+          .from("clientes")
+          .update({ razon_social: c.razon_social, local: c.local, email: c.email, phone: c.phone })
+          .eq("codigo_interno", c.codigo_interno);
+        actualizados++;
+      } else {
+        const { error } = await supabase
+          .from("clientes")
+          .insert([
+            {
+              woocommerce_id: null,
+              first_name: "",
+              last_name: "",
+              email: c.email,
+              phone: c.phone,
+              codigo_interno: c.codigo_interno,
+              razon_social: c.razon_social,
+              local: c.local,
+            },
+          ])
+          .select()
+          .single();
+        if (error) throw error;
+        creados++;
+      }
+    }
+
+    res.json({ actualizados, creados });
   } catch (err) {
     next(err);
   }

@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { notificarExito, notificarError } from "../helpers/toast";
-import { vendedores } from "../helpers/vendedores";
 
 const ModalEditarCliente = ({ cliente, setCliente, onGuardado }) => {
-    const [form, setForm] = useState({ first_name: "", last_name: "", email: "", telefono: "" });
+    const [form, setForm] = useState({ codigo_interno: "", razon_social: "", local: "", email: "", telefono: "" });
     const [cargando, setCargando] = useState(false);
 
     useEffect(() => {
         if (cliente) {
             setForm({
-                first_name: cliente.first_name || "",
-                last_name: cliente.last_name || "",
+                codigo_interno: cliente.codigo_interno || "",
+                razon_social: cliente.razon_social || "",
+                local: cliente.local || "",
                 email: cliente.email || "",
                 telefono: cliente.phone || "",
             });
@@ -67,13 +67,18 @@ const ModalEditarCliente = ({ cliente, setCliente, onGuardado }) => {
 
                 <div className="flex flex-col gap-4">
                     <div>
-                        <label htmlFor="c-nombre" className={labelCls}>Nombre</label>
-                        <input id="c-nombre" type="text" value={form.first_name} onChange={set("first_name")} className={inputCls} />
+                        <label htmlFor="c-codigo" className={labelCls}>Código</label>
+                        <input id="c-codigo" type="text" value={form.codigo_interno} onChange={set("codigo_interno")} className={inputCls} />
                     </div>
 
                     <div>
-                        <label htmlFor="c-apellido" className={labelCls}>Apellido</label>
-                        <input id="c-apellido" type="text" value={form.last_name} onChange={set("last_name")} className={inputCls} />
+                        <label htmlFor="c-razon" className={labelCls}>Razón social</label>
+                        <input id="c-razon" type="text" value={form.razon_social} onChange={set("razon_social")} className={inputCls} />
+                    </div>
+
+                    <div>
+                        <label htmlFor="c-local" className={labelCls}>Local</label>
+                        <input id="c-local" type="text" value={form.local} onChange={set("local")} className={inputCls} />
                     </div>
 
                     <div>
@@ -82,13 +87,8 @@ const ModalEditarCliente = ({ cliente, setCliente, onGuardado }) => {
                     </div>
 
                     <div>
-                        <label htmlFor="c-vendedor" className={labelCls}>Vendedor</label>
-                        <select id="c-vendedor" value={form.telefono} onChange={set("telefono")} className={inputCls}>
-                            <option value="">Sin vendedor</option>
-                            {vendedores.map((v) => (
-                                <option key={v.value} value={v.value}>{v.label}</option>
-                            ))}
-                        </select>
+                        <label htmlFor="c-telefono" className={labelCls}>Teléfono</label>
+                        <input id="c-telefono" type="text" value={form.telefono} onChange={set("telefono")} className={inputCls} />
                     </div>
 
                     <button

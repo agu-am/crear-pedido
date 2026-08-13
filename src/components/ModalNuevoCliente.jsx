@@ -3,9 +3,10 @@ import api from "../helpers/api";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { notificarExito, notificarError } from "../helpers/toast";
 
-const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
-    const [first_name, setFirst_name] = useState('');
-    const [username, setUsername] = useState('');
+const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente, onGuardado }) => {
+    const [codigo, setCodigo] = useState('');
+    const [razon_social, setRazon_social] = useState('');
+    const [local, setLocal] = useState('');
     const [email, setEmail] = useState('');
     const [cargando, setCargando] = useState(false);
 
@@ -14,18 +15,24 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
         setCargando(true);
 
         try {
-            await api.post('/clientes', { first_name, username, email });
+            await api.post('/clientes', { codigo_interno: codigo, razon_social, local, email });
             setModalNuevoCliente(false);
-            setFirst_name('');
-            setUsername('');
+            setCodigo('');
+            setRazon_social('');
+            setLocal('');
             setEmail('');
             notificarExito('Cliente agregado exitosamente');
+            onGuardado?.();
         } catch (error) {
             notificarError(error?.response?.data?.message || 'Error al agregar cliente');
         } finally {
             setCargando(false);
         }
     };
+
+    const inputCls =
+        "w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500";
+    const labelCls = "mb-1 block text-xs font-semibold uppercase tracking-wide text-mute";
 
     return (
         <div
@@ -51,52 +58,47 @@ const ModalNuevoCliente = ({ modalNuevoCliente, setModalNuevoCliente }) => {
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <div>
-                        <label
-                            htmlFor="nuevo-nombre"
-                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
-                        >
-                            Nombre
-                        </label>
+                        <label htmlFor="nuevo-codigo" className={labelCls}>Código</label>
                         <input
-                            id="nuevo-nombre"
+                            id="nuevo-codigo"
                             type="text"
-                            value={first_name}
-                            onChange={(e) => setFirst_name(e.target.value)}
-                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            value={codigo}
+                            onChange={(e) => setCodigo(e.target.value)}
+                            className={inputCls}
                         />
                     </div>
 
                     <div>
-                        <label
-                            htmlFor="nuevo-username"
-                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
-                        >
-                            Username
-                        </label>
+                        <label htmlFor="nuevo-razon" className={labelCls}>Razón social</label>
                         <input
-                            id="nuevo-username"
+                            id="nuevo-razon"
                             type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={razon_social}
+                            onChange={(e) => setRazon_social(e.target.value)}
                             required
-                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            className={inputCls}
                         />
                     </div>
 
                     <div>
-                        <label
-                            htmlFor="nuevo-email"
-                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-mute"
-                        >
-                            Email
-                        </label>
+                        <label htmlFor="nuevo-local" className={labelCls}>Local</label>
+                        <input
+                            id="nuevo-local"
+                            type="text"
+                            value={local}
+                            onChange={(e) => setLocal(e.target.value)}
+                            className={inputCls}
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="nuevo-email" className={labelCls}>Email</label>
                         <input
                             id="nuevo-email"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="w-full rounded-xl border border-ink bg-canvas px-4 py-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            className={inputCls}
                         />
                     </div>
 

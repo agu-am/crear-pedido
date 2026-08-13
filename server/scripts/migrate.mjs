@@ -96,10 +96,9 @@ async function migrarProductos() {
 }
 
 async function migrarClientes() {
-  const clientes = await traerTodo("customers", { _fields: "id,username,email,billing" });
+  const clientes = await traerTodo("customers", { _fields: "id,email,billing" });
   const rows = clientes.map((c) => ({
     woocommerce_id: c.id,
-    username: c.username || "",
     first_name: c.billing?.first_name || "",
     last_name: c.billing?.last_name || "",
     email: c.email || "",

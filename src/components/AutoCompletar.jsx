@@ -23,9 +23,17 @@ const SearchAutoCompletar = () => {
     }))
   }
 
-  const formatResult = (item) => (
-    <span className="block px-2 py-1.5 text-left text-sm text-ink">{item.name}</span>
-  )
+  const formatResult = (item) => {
+    const local = item.local ? `, ${item.local}` : "";
+    return (
+      <span className="block px-2 py-1.5 text-left text-sm text-ink">
+        {item.codigo_interno ? (
+          <><strong className="font-semibold">{item.codigo_interno}</strong> - </>
+        ) : null}
+        {item.razon_social}{local}
+      </span>
+    )
+  }
 
   return (
     <div className="w-full">

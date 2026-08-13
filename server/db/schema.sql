@@ -53,11 +53,13 @@ CREATE TABLE IF NOT EXISTS producto_categorias (
 CREATE TABLE IF NOT EXISTS clientes (
   id BIGSERIAL PRIMARY KEY,
   woocommerce_id BIGINT UNIQUE,
-  username TEXT DEFAULT '',
   first_name TEXT DEFAULT '',
   last_name TEXT DEFAULT '',
   email TEXT DEFAULT '',
   phone TEXT DEFAULT '',
+  codigo_interno TEXT DEFAULT '',
+  razon_social TEXT DEFAULT '',
+  local TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
