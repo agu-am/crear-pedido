@@ -2,8 +2,10 @@ import { useEffect, useState } from "react"
 import usePedido from "../hooks/usePedido"
 import { formatearFecha, formatearHora } from "../helpers"
 import { estadosOrden } from "../helpers/estados"
+import { notificarError } from "../helpers/toast"
 import Error from "./Error"
 import ModalEditarOrden from "./ModalEditarOrden"
+import ConfirmarModal from "./ConfirmarModal"
 import { FaClipboardList, FaEdit, FaTrashAlt } from "react-icons/fa"
 
 const INTERVALO_REFRESCO = 30000
@@ -21,7 +23,8 @@ const ListadoOrdenes = () => {
         setFiltroHasta,
     } = usePedido()
     const [editando, setEditando] = useState(null)
-    const [eliminando, setEliminando] = useState(false)
+    const [eliminando, setEliminando] = useState(null)
+    const [cargandoEliminar, setCargandoEliminar] = useState(false)
 
     useEffect(() => {
         obtenerOrdenes()
@@ -31,15 +34,19 @@ const ListadoOrdenes = () => {
         return () => clearInterval(id)
     }, [obtenerOrdenes])
 
-    const handleEliminar = async (o) => {
-        if (!window.confirm(`¿Eliminar la orden de ${o.billing?.first_name || "cliente"}?`)) return
-        setEliminando(true)
+    const handleEliminar = (o) => {
+        setEliminando(o)
+    }
+
+    const confirmarEliminar = async () => {
+        setCargandoEliminar(true)
         try {
-            await eliminarOrden(o.id)
+            await eliminarOrden(eliminando.id)
+            setEliminando(null)
         } catch (error) {
-            alert(error?.response?.data?.message || "No se pudo eliminar la orden")
+            notificarError(error?.response?.data?.message || "No se pudo eliminar la orden")
         } finally {
-            setEliminando(false)
+            setCargandoEliminar(false)
         }
     }
 
@@ -182,6 +189,15 @@ const ListadoOrdenes = () => {
             </div>
 
             <ModalEditarOrden orden={editando} setOrden={setEditando} />
+
+            <ConfirmarModal
+                abierto={!!eliminando}
+                titulo="Eliminar orden"
+                mensaje={`¿Eliminar la orden de ${eliminando?.billing?.first_name || "cliente"}? Esta acción no se puede deshacer.`}
+                onConfirmar={confirmarEliminar}
+                onCancelar={() => setEliminando(null)}
+                cargando={cargandoEliminar}
+            />
         </div>
     )
 }

@@ -4,6 +4,7 @@ import { notificarExito, notificarError } from "../helpers/toast";
 import Error from "../components/Error";
 import ModalProducto from "../components/ModalProducto";
 import ModalCargaMasiva from "../components/ModalCargaMasiva";
+import ConfirmarModal from "../components/ConfirmarModal";
 import Paginador from "../components/Paginador";
 import { FaPlus, FaSearch, FaEdit, FaUpload, FaTrashAlt } from "react-icons/fa";
 
@@ -25,6 +26,8 @@ const Productos = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState(null);
   const [modalCarga, setModalCarga] = useState(false);
+  const [eliminando, setEliminando] = useState(null);
+  const [cargandoEliminar, setCargandoEliminar] = useState(false);
   const [orden, setOrden] = useState({ clave: "name", dir: "asc" });
 
   const obtener = useCallback(async (search, page) => {
@@ -103,14 +106,21 @@ const Productos = () => {
     }
   };
 
-  const eliminarProducto = async (producto) => {
-    if (!window.confirm(`¿Eliminar "${producto.name}"? Esta acción no se puede deshacer.`)) return
+  const eliminarProducto = (producto) => {
+    setEliminando(producto)
+  };
+
+  const confirmarEliminar = async () => {
+    setCargandoEliminar(true)
     try {
-      await api.delete(`/productos/${producto.id}`)
+      await api.delete(`/productos/${eliminando.id}`)
       notificarExito("Producto eliminado")
+      setEliminando(null)
       await obtener(busqueda, pagina)
     } catch (e) {
       notificarError(e?.response?.data?.message || "No se pudo eliminar el producto")
+    } finally {
+      setCargandoEliminar(false)
     }
   };
 
@@ -234,6 +244,15 @@ const Productos = () => {
         abierto={modalCarga}
         onCerrar={() => setModalCarga(false)}
         onAplicado={() => obtener(busqueda, pagina)}
+      />
+
+      <ConfirmarModal
+        abierto={!!eliminando}
+        titulo="Eliminar producto"
+        mensaje={`¿Eliminar "${eliminando?.name}"? Esta acción no se puede deshacer.`}
+        onConfirmar={confirmarEliminar}
+        onCancelar={() => setEliminando(null)}
+        cargando={cargandoEliminar}
       />
     </div>
   )
