@@ -5,7 +5,7 @@ import Error from "../components/Error";
 import ModalProducto from "../components/ModalProducto";
 import ModalCargaMasiva from "../components/ModalCargaMasiva";
 import Paginador from "../components/Paginador";
-import { FaPlus, FaSearch, FaEdit, FaUpload } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEdit, FaUpload, FaTrashAlt } from "react-icons/fa";
 
 const TAMANIO_PAGINA = 50;
 
@@ -103,6 +103,17 @@ const Productos = () => {
     }
   };
 
+  const eliminarProducto = async (producto) => {
+    if (!window.confirm(`¿Eliminar "${producto.name}"? Esta acción no se puede deshacer.`)) return
+    try {
+      await api.delete(`/productos/${producto.id}`)
+      notificarExito("Producto eliminado")
+      await obtener(busqueda, pagina)
+    } catch (e) {
+      notificarError(e?.response?.data?.message || "No se pudo eliminar el producto")
+    }
+  };
+
   const thCls = (clave) =>
     `cursor-pointer select-none px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mute transition hover:text-ink ${
       orden.clave === clave ? "text-ink" : ""
@@ -186,12 +197,20 @@ const Productos = () => {
                         <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${badge.cls}`}>{badge.label}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => abrirEditar(p)}
-                          className="flex items-center gap-1.5 rounded-full border border-ink px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-canvas-soft"
-                        >
-                          <FaEdit size="0.7rem" /> Editar
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => abrirEditar(p)}
+                            className="flex items-center gap-1.5 rounded-full border border-ink px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-canvas-soft"
+                          >
+                            <FaEdit size="0.7rem" /> Editar
+                          </button>
+                          <button
+                            onClick={() => eliminarProducto(p)}
+                            className="flex items-center gap-1.5 rounded-full bg-negative-bg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+                          >
+                            <FaTrashAlt size="0.7rem" /> Eliminar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
