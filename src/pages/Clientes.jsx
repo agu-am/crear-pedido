@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "../helpers/api";
+import { notificarExito, notificarError } from "../helpers/toast";
 import Error from "../components/Error";
 import Paginador from "../components/Paginador";
 import ModalNuevoCliente from "../components/ModalNuevoCliente";
 import ModalEditarCliente from "../components/ModalEditarCliente";
-import { FaUserPlus, FaEdit, FaSearch } from "react-icons/fa";
+import ConfirmarModal from "../components/ConfirmarModal";
+import { FaUserPlus, FaEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
 
 const TAMANIO_PAGINA = 25;
 
@@ -17,6 +19,8 @@ const Clientes = () => {
     const [error, setError] = useState(false);
     const [modalNuevo, setModalNuevo] = useState(false);
     const [editando, setEditando] = useState(null);
+    const [eliminando, setEliminando] = useState(null);
+    const [cargandoEliminar, setCargandoEliminar] = useState(false);
 
     const obtener = useCallback(async (search, page) => {
         try {
@@ -51,6 +55,20 @@ const Clientes = () => {
     const handleGuardadoCliente = async () => {
         setEditando(null);
         await obtener(busqueda, pagina);
+    };
+
+    const confirmarEliminar = async () => {
+        setCargandoEliminar(true);
+        try {
+            await api.delete(`/clientes/${eliminando.id}`);
+            setEliminando(null);
+            notificarExito("Cliente eliminado");
+            await obtener(busqueda, pagina);
+        } catch (e) {
+            notificarError(e?.response?.data?.message || "No se pudo eliminar el cliente");
+        } finally {
+            setCargandoEliminar(false);
+        }
     };
 
     return (
@@ -105,12 +123,20 @@ const Clientes = () => {
                                         <td className="px-4 py-3 text-sm text-body">{c.email}</td>
                                         <td className="px-4 py-3 text-sm text-body">{c.phone}</td>
                                         <td className="px-4 py-3">
-                                            <button
-                                                onClick={() => setEditando(c)}
-                                                className="flex items-center gap-1.5 rounded-full border border-ink px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-canvas-soft"
-                                            >
-                                                <FaEdit size="0.7rem" /> Editar
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => setEditando(c)}
+                                                    className="flex items-center gap-1.5 rounded-full border border-ink px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-canvas-soft"
+                                                >
+                                                    <FaEdit size="0.7rem" /> Editar
+                                                </button>
+                                                <button
+                                                    onClick={() => setEliminando(c)}
+                                                    className="flex items-center gap-1.5 rounded-full bg-negative-bg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+                                                >
+                                                    <FaTrashAlt size="0.7rem" /> Eliminar
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -124,6 +150,15 @@ const Clientes = () => {
 
             <ModalNuevoCliente modalNuevoCliente={modalNuevo} setModalNuevoCliente={setModalNuevo} />
             <ModalEditarCliente cliente={editando} setCliente={setEditando} onGuardado={handleGuardadoCliente} />
+
+            <ConfirmarModal
+                abierto={!!eliminando}
+                titulo="Eliminar cliente"
+                mensaje={`¿Eliminar "${eliminando?.name}"? Esta acción no se puede deshacer.`}
+                onConfirmar={confirmarEliminar}
+                onCancelar={() => setEliminando(null)}
+                cargando={cargandoEliminar}
+            />
         </div>
     );
 }

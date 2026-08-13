@@ -597,6 +597,36 @@ router.put("/api/clientes/:id/telefono", authRequerido, async (req, res, next) =
   }
 });
 
+router.delete("/api/clientes/:id", authRequerido, async (req, res, next) => {
+  try {
+    if (!supabase) throw new Error("Supabase no configurado");
+    const id = Number(req.params.id);
+    const { data: existe } = await supabase
+      .from("clientes")
+      .select("id,woocommerce_id")
+      .eq("id", id)
+      .maybeSingle();
+    if (!existe) return res.status(404).json({ message: "Cliente no encontrado" });
+
+    const { error } = await supabase.from("clientes").delete().eq("id", id);
+    if (error) throw error;
+
+    if (process.env.WC_URL && existe.woocommerce_id) {
+      try {
+        await wcFetch(`customers/${existe.woocommerce_id}`, {
+          method: "DELETE",
+          query: { force: "true" },
+        });
+      } catch (e) {
+        console.error("Borrado de cliente en WooCommerce fallo:", e.message);
+      }
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ---------- Órdenes ----------
 router.get("/api/ordenes", authRequerido, async (req, res, next) => {
   try {
